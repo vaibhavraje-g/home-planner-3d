@@ -6,6 +6,7 @@ import { RightPaintStudio } from './components/RightPaintStudio';
 import { BlueprintModal } from './components/BlueprintModal';
 import { SpecsModal } from './components/SpecsModal';
 import { VastuModal } from './components/VastuModal';
+import { AiRendersModal } from './components/AiRendersModal';
 import { FloatingLabelsOverlay } from './components/FloatingLabelsOverlay';
 import { WalkControlsOverlay } from './components/WalkControlsOverlay';
 import {
@@ -60,6 +61,7 @@ export default function App() {
   const [isBlueprintOpen, setIsBlueprintOpen] = useState<boolean>(false);
   const [isSpecsOpen, setIsSpecsOpen] = useState<boolean>(false);
   const [isVastuOpen, setIsVastuOpen] = useState<boolean>(false);
+  const [isAiRendersOpen, setIsAiRendersOpen] = useState<boolean>(false);
 
   // Mode change handler
   const handleSetMode = (newMode: 'orbit' | 'dollhouse' | 'walk') => {
@@ -198,6 +200,7 @@ export default function App() {
         openBlueprint={() => setIsBlueprintOpen(true)}
         openSpecs={() => setIsSpecsOpen(true)}
         openVastu={() => setIsVastuOpen(true)}
+        openAiRenders={() => setIsAiRendersOpen(true)}
         onCaptureSnapshot={handleCaptureSnapshot}
       />
 
@@ -253,6 +256,12 @@ export default function App() {
         isOpen={isVastuOpen}
         onClose={() => setIsVastuOpen(false)}
         onSelectRoom={handleTeleportRoom}
+      />
+
+      {/* 8K AI Photorealistic Renders Gallery Modal */}
+      <AiRendersModal
+        isOpen={isAiRendersOpen}
+        onClose={() => setIsAiRendersOpen(false)}
       />
     </main>
   );

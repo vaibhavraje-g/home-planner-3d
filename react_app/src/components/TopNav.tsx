@@ -13,7 +13,8 @@ import {
   MapPin,
   Camera,
   Info,
-  ShieldCheck
+  ShieldCheck,
+  Sparkles
 } from 'lucide-react';
 import { TimeOfDay } from '../types/architectural';
 
@@ -35,6 +36,7 @@ interface TopNavProps {
   openBlueprint: () => void;
   openSpecs: () => void;
   openVastu: () => void;
+  openAiRenders: () => void;
   onCaptureSnapshot: () => void;
 }
 
@@ -56,6 +58,7 @@ export const TopNav: React.FC<TopNavProps> = ({
   openBlueprint,
   openSpecs,
   openVastu,
+  openAiRenders,
   onCaptureSnapshot
 }) => {
   return (
@@ -152,6 +155,15 @@ export const TopNav: React.FC<TopNavProps> = ({
 
       {/* Quick Action Tools */}
       <div className="flex items-center gap-1.5">
+        <button
+          onClick={openAiRenders}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-500/25 to-amber-600/25 text-amber-300 border border-amber-500/40 hover:bg-amber-500/35 transition-all shadow-sm"
+          title="View 8K Frontier AI Photorealistic Renders"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <span>8K AI Renders</span>
+        </button>
+
         <button
           onClick={openBlueprint}
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-all shadow-sm"
