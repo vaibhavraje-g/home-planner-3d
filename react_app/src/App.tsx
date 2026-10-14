@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { ThreeCanvas } from './components/ThreeCanvas';
 import { TopNav } from './components/TopNav';
-import { SideControlPanel } from './components/SideControlPanel';
+import { LeftControlPanel } from './components/LeftControlPanel';
+import { RightPaintStudio } from './components/RightPaintStudio';
 import { BlueprintModal } from './components/BlueprintModal';
 import { SpecsModal } from './components/SpecsModal';
 import { VastuModal } from './components/VastuModal';
@@ -207,15 +208,8 @@ export default function App() {
         onExitWalk={() => handleSetMode('orbit')}
       />
 
-      {/* Sleek Floating Right-Side Control Panel (Zero Middle Occlusion) */}
-      <SideControlPanel
-        activeCategory={activeCategory}
-        setActiveCategory={setActiveCategory}
-        categoryColors={categoryColors}
-        onApplyShade={handleApplyShade}
-        onApplyTheme={handleApplyTheme}
-        onEnableClayMode={handleEnableClayMode}
-        activeThemeId={activeThemeId}
+      {/* Left-Side Control Panel: Elevation Presets, Room Teleports, Lighting & Sun Angles */}
+      <LeftControlPanel
         onSelectPreset={handleSelectPreset}
         onTeleportRoom={handleTeleportRoom}
         timeOfDay={timeOfDay}
@@ -227,6 +221,18 @@ export default function App() {
         isFansActive={isFansActive}
         setIsFansActive={setIsFansActive}
         onOpenVastuModal={() => setIsVastuOpen(true)}
+        activeRoomId={activeRoomId}
+      />
+
+      {/* Right-Side Asian Paints Colour Studio: Surface Picker, Curated Themes, 60+ Swatches */}
+      <RightPaintStudio
+        activeCategory={activeCategory}
+        setActiveCategory={setActiveCategory}
+        categoryColors={categoryColors}
+        onApplyShade={handleApplyShade}
+        onApplyTheme={handleApplyTheme}
+        onEnableClayMode={handleEnableClayMode}
+        activeThemeId={activeThemeId}
       />
 
       {/* Interactive 2D Blueprint Modal */}
