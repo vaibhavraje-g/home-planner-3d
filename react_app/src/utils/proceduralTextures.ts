@@ -387,6 +387,29 @@ export function createPlasterTexture(anisotropy = 8): THREE.CanvasTexture {
   return tex;
 }
 
+export function createPlasterBumpTexture(anisotropy = 8): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return new THREE.CanvasTexture(canvas);
+
+  const image = ctx.createImageData(256, 256);
+  for (let i = 0; i < image.data.length; i += 4) {
+    const value = 224 + Math.random() * 31;
+    image.data[i] = image.data[i + 1] = image.data[i + 2] = value;
+    image.data[i + 3] = 255;
+  }
+  ctx.putImageData(image, 0, 0);
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(6, 6);
+  tex.anisotropy = Math.min(anisotropy, 8);
+  tex.needsUpdate = true;
+  return tex;
+}
+
 /**
  * Realistic blade-textured lawn grass.
  */

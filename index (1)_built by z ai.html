@@ -1,0 +1,2631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D House Visualizer & Asian Paints Decorator Studio (37' × 50' Villa)</title>
+  <style>
+    :root {
+      --bg-glass: rgba(16, 18, 24, 0.82);
+      --bg-glass-hover: rgba(28, 32, 42, 0.92);
+      --border-glass: rgba(255, 255, 255, 0.12);
+      --accent: #e5a952;
+      --accent-glow: rgba(229, 169, 82, 0.35);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--font-sans);
+      background: #181a20;
+      color: var(--text-main);
+    }
+
+    #canvas-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Glassmorphic UI Overlay Panels */
+    .glass-panel {
+      background: var(--bg-glass);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      z-index: 10;
+      transition: all 0.25s ease;
+    }
+
+    /* Top Bar */
+    #top-bar {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 18px;
+      gap: 12px;
+      flex-wrap: wrap;
+      pointer-events: auto;
+    }
+
+    .brand-block {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #e5a952, #b87b28);
+      color: #111;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .mode-switcher {
+      display: flex;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .btn {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .btn.active {
+      background: var(--accent);
+      color: #111318;
+      box-shadow: 0 2px 12px var(--accent-glow);
+    }
+
+    .toggles-group {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .toggle-pill {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      padding: 6px 11px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .toggle-pill.on {
+      border-color: var(--accent);
+      background: rgba(229, 169, 82, 0.16);
+      color: #ffd591;
+    }
+
+    /* Left Navigation & Camera Presets Panel */
+    #left-panel {
+      position: absolute;
+      top: 84px;
+      left: 16px;
+      width: 280px;
+      max-height: calc(100vh - 104px);
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Right Asian Paints Decorator Panel */
+    #right-panel {
+      position: absolute;
+      top: 84px;
+      right: 16px;
+      width: 330px;
+      max-height: calc(100vh - 104px);
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .panel-section:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--accent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .preset-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.18s;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .preset-btn small {
+      font-size: 9.5px;
+      color: var(--text-muted);
+    }
+
+    .preset-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+
+    .preset-btn.active {
+      border-color: var(--accent);
+      background: rgba(229, 169, 82, 0.18);
+    }
+
+    /* Theme Cards */
+    .theme-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 9px;
+      padding: 9px 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .theme-card:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .theme-card.active {
+      border-color: var(--accent);
+      background: rgba(229, 169, 82, 0.15);
+    }
+
+    .theme-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .swatch-strip {
+      display: flex;
+      height: 14px;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .swatch-strip span {
+      flex: 1;
+      height: 100%;
+    }
+
+    /* Swatch Grid */
+    .swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+    }
+
+    .color-swatch {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 5px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+
+    .color-swatch:hover {
+      transform: translateY(-2px);
+      border-color: #fff;
+    }
+
+    .color-swatch.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    .swatch-circle {
+      width: 100%;
+      height: 24px;
+      border-radius: 5px;
+      border: 1px solid rgba(0,0,0,0.25);
+    }
+
+    .swatch-name {
+      font-size: 9.5px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.1;
+      color: var(--text-main);
+    }
+
+    .swatch-code {
+      font-size: 8.5px;
+      color: var(--text-muted);
+    }
+
+    select.surface-select {
+      width: 100%;
+      padding: 8px 10px;
+      background: rgba(0, 0, 0, 0.45);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Floating 3D Room Labels (Dollhouse View) */
+    #labels-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+      overflow: hidden;
+    }
+
+    .room-label {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      background: rgba(12, 14, 18, 0.85);
+      border: 1px solid rgba(229, 169, 82, 0.55);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 600;
+      white-space: nowrap;
+      pointer-events: auto;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    .room-label:hover {
+      background: var(--accent);
+      color: #111;
+      transform: translate(-50%, -50%) scale(1.08);
+    }
+
+    .room-label span {
+      display: block;
+      font-size: 9px;
+      color: #cbd5e1;
+      font-weight: 400;
+    }
+
+    .room-label:hover span {
+      color: #222;
+    }
+
+    /* Bottom Status / Raycast & Walk HUD */
+    #bottom-hud {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 9px 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      pointer-events: auto;
+      white-space: nowrap;
+    }
+
+    .kbd {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10.5px;
+      font-weight: 700;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+    }
+
+    @media (max-width: 900px) {
+      #left-panel, #right-panel {
+        width: 240px;
+      }
+      #bottom-hud {
+        font-size: 10.5px;
+        padding: 7px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 3D WebGL Viewport -->
+  <div id="canvas-container"></div>
+
+  <!-- Floating 3D Room Labels Container -->
+  <div id="labels-container"></div>
+
+  <!-- Top Navigation & Mode Bar -->
+  <div id="top-bar" class="glass-panel">
+    <div class="brand-block">
+      <span class="brand-badge">37' × 50' Blueprint</span>
+      <div>
+        <div class="brand-title">3D Villa Visualizer & Asian Paints Studio</div>
+        <div class="brand-sub">Corrected Floor Plan • Realistic Materials & Daylight</div>
+      </div>
+    </div>
+
+    <div class="mode-switcher">
+      <button class="btn active" id="mode-orbit" onclick="setExplorationMode('orbit')">1. Exterior Orbit</button>
+      <button class="btn" id="mode-dollhouse" onclick="setExplorationMode('dollhouse')">2. Cutaway Dollhouse</button>
+      <button class="btn" id="mode-walk" onclick="setExplorationMode('walk')">3. Walk Inside (1st Person)</button>
+    </div>
+
+    <div class="toggles-group">
+      <button class="toggle-pill" id="toggle-clay" onclick="enableClayMode()">Clay Mode (Uncolored)</button>
+      <button class="toggle-pill on" id="toggle-sky" onclick="toggleEnvironment('sky')">Sky: Daylight</button>
+      <button class="toggle-pill on" id="toggle-ground" onclick="toggleEnvironment('ground')">Ground: Lawn & Plants</button>
+      <button class="toggle-pill on" id="toggle-roof" onclick="toggleEnvironment('roof')">Roof: Attached</button>
+      <button class="toggle-pill on" id="toggle-labels" onclick="toggleEnvironment('labels')">3D Labels</button>
+    </div>
+  </div>
+
+  <!-- Left Panel: Camera Elevations & Room Teleports -->
+  <div id="left-panel" class="glass-panel">
+    <div class="panel-section">
+      <div class="section-title">
+        <span>Exterior Elevation Views</span>
+        <small style="color:var(--text-muted)">Orbit</small>
+      </div>
+      <div class="grid-2">
+        <button class="preset-btn active" onclick="tweenToPreset('iso')">
+          <strong>3/4 Isometric</strong>
+          <small>Site Render Match</small>
+        </button>
+        <button class="preset-btn" onclick="tweenToPreset('front')">
+          <strong>East (Front)</strong>
+          <small>Porch & Cutouts</small>
+        </button>
+        <button class="preset-btn" onclick="tweenToPreset('south')">
+          <strong>South (Right)</strong>
+          <small>2 Box Windows & Niche</small>
+        </button>
+        <button class="preset-btn" onclick="tweenToPreset('north')">
+          <strong>North (Left)</strong>
+          <small>5 Columns & Mumty</small>
+        </button>
+        <button class="preset-btn" onclick="tweenToPreset('west')">
+          <strong>West (Rear)</strong>
+          <small>Straight Exit Door</small>
+        </button>
+        <button class="preset-btn" onclick="tweenToPreset('top')">
+          <strong>Top Roof Plan</strong>
+          <small>37' × 50' Layout</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-title">
+        <span>Walk Inside Room Teleports</span>
+        <small style="color:var(--text-muted)">5'2" Eye</small>
+      </div>
+      <div class="grid-2">
+        <button class="preset-btn" onclick="teleportToRoom('porch')">
+          <strong>Front Verandah</strong>
+          <small>Teak Walls • Sunken Roof</small>
+        </button>
+        <button class="preset-btn" onclick="teleportToRoom('living')">
+          <strong>Living Room</strong>
+          <small>21'0" × 16'6" • POP + Fan</small>
+        </button>
+        <button class="preset-btn" onclick="teleportToRoom('kitchen')">
+          <strong>Kitchen</strong>
+          <small>18'0" × 12'0" • East Platform</small>
+        </button>
+        <button class="preset-btn" onclick="teleportToRoom('puja')">
+          <strong>Puja Sanctuary</strong>
+          <small>5'0" × 3'0" • Jali Door</small>
+        </button>
+        <button class="preset-btn" onclick="teleportToRoom('passage')">
+          <strong>Central Passage</strong>
+          <small>Open Axis • Washing Machine</small>
+        </button>
+        <button class="preset-btn" onclick="teleportToRoom('master')">
+          <strong>Master Bedroom</strong>
+          <small>12'0" × 14'6" + Toilet</small>
+        </button>
+        <button class="preset-btn" onclick="teleportToRoom('bed2')">
+          <strong>Bedroom 2</strong>
+          <small>14'0" × 11'0" + Washroom</small>
+        </button>
+        <button class="preset-btn" onclick="teleportToRoom('bed3')">
+          <strong>Bedroom 3</strong>
+          <small>14'0" × 12'0" • Rear-Left</small>
+        </button>
+        <button class="preset-btn" onclick="teleportToRoom('sanitary')">
+          <strong>Common Washroom</strong>
+          <small>3 Sections • Basin Centre</small>
+        </button>
+        <button class="preset-btn" onclick="teleportToRoom('mumty')">
+          <strong>Stairs & Mumty</strong>
+          <small>Rooftop Terrace Exit</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-title">
+        <span>Blueprint Ground Truth</span>
+      </div>
+      <div style="font-size: 11px; color: var(--text-muted); line-height: 1.45;">
+        • <strong>Walk Axis:</strong> Porch door (left) → Hall → open 8'6" passage → aligned rear door.<br>
+        • <strong>Kitchen 18'×12':</strong> east cooking platform + pooja ghar; west entrance from hall.<br>
+        • <strong>Washrooms:</strong> attached to Master & Bed 2; common washroom in 3 sections with the washing machine outside along the passage wall.<br>
+        • <strong>Porch:</strong> dark wood-tiled front & left walls (fixed), lighter wood ceiling, sunken roof slab.
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel: Asian Paints Decorator Studio -->
+  <div id="right-panel" class="glass-panel">
+    <div class="panel-section">
+      <div class="section-title">
+        <span>Curated Asian Paints Themes</span>
+        <span style="font-size:10px; color:#cbd5e1; cursor:pointer; text-decoration:underline;" onclick="enableClayMode()">Reset Clay</span>
+      </div>
+
+      <div class="theme-card" id="theme-clay" onclick="enableClayMode()">
+        <div class="theme-header">
+          <span>Mode 0: Pure Architectural Clay (Toggle)</span>
+        </div>
+        <div class="swatch-strip">
+          <span style="background:#EEEEEE"></span>
+          <span style="background:#E5E5E5"></span>
+          <span style="background:#DCDCDC"></span>
+          <span style="background:#CCCCCC"></span>
+        </div>
+      </div>
+
+      <div class="theme-card" id="theme-1" onclick="applyCuratedTheme(1)">
+        <div class="theme-header">
+          <span>Theme 1: Warm Sandstone & Teak (Render Match)</span>
+        </div>
+        <div class="swatch-strip">
+          <span style="background:#F3EFE6" title="Innocent White L180"></span>
+          <span style="background:#C4B59D" title="Sand Drift 8461"></span>
+          <span style="background:#C89B61" title="Camel Skin 8515"></span>
+          <span style="background:#474B4E" title="Thundercloud 8305"></span>
+          <span style="background:#985934" title="Teak Plank Tiles"></span>
+        </div>
+      </div>
+
+      <div class="theme-card" id="theme-2" onclick="applyCuratedTheme(2)">
+        <div class="theme-header">
+          <span>Theme 2: Soft Subtle Pastels (Owner Shortlist)</span>
+        </div>
+        <div class="swatch-strip">
+          <span style="background:#F6F3EC" title="Cream Pie L152"></span>
+          <span style="background:#D8EAE6" title="Aqua Hint L114"></span>
+          <span style="background:#E5DDEB" title="Lilac Breeze 7188"></span>
+          <span style="background:#D9DFE3" title="Gem Stone 7172"></span>
+          <span style="background:#C4B59D" title="Sand Drift 8461"></span>
+        </div>
+      </div>
+
+      <div class="theme-card" id="theme-3" onclick="applyCuratedTheme(3)">
+        <div class="theme-header">
+          <span>Theme 3: Modern Greige & Mocha Earth</span>
+        </div>
+        <div class="swatch-strip">
+          <span style="background:#FAF7EF" title="Morning Glory 0765"></span>
+          <span style="background:#AFA89B" title="Raw Jute 8513"></span>
+          <span style="background:#5E4632" title="Nut Brown-N 0419"></span>
+          <span style="background:#383A3C" title="Charcoal Grey 8297"></span>
+        </div>
+      </div>
+
+      <div class="theme-card" id="theme-4" onclick="applyCuratedTheme(4)">
+        <div class="theme-header">
+          <span>Theme 4: Vastu Harmonized (East Entrance)</span>
+        </div>
+        <div class="swatch-strip">
+          <span style="background:#EAE6DD" title="Canvas Cream 0313"></span>
+          <span style="background:#C4B59D" title="Sand Drift 8461"></span>
+          <span style="background:#C89B61" title="Camel Skin 8515"></span>
+          <span style="background:#606466" title="Pewter 8298"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-title">
+        <span>Target Surface Category</span>
+        <small id="raycast-hint" style="color:#93c5fd">or Click 3D Surface</small>
+      </div>
+      <select id="surface-selector" class="surface-select" onchange="onSurfaceCategoryChange(this.value)">
+        <option value="ext_main">Exterior Main Walls (Innocent White L180)</option>
+        <option value="box_grooves">Window Box Chajjas & Grooves (Sand Drift 8461)</option>
+        <option value="parapet_box">Parapet Cutout Accent Frame (Camel Skin 8515)</option>
+        <option value="pillar_plinth">Porch Circular Pillar & Plinth (Thundercloud 8305)</option>
+        <option value="porch_wood">Porch Dark Teak Wall Tiles (#7A4327 - Fixed)</option>
+        <option value="stone_niche">Split-Face Stone Cladding Niche (#686A6D)</option>
+        <option value="int_living">Living & Passage Interior Walls</option>
+        <option value="int_master">Master Bedroom Interior Walls</option>
+        <option value="int_bed23">Bedrooms 2 & 3 Accent Walls</option>
+        <option value="int_kitchen">Kitchen & Puja Ghar Walls</option>
+      </select>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-title">
+        <span>Official Asian Paints Shade Library</span>
+      </div>
+      <div class="swatch-grid" id="swatch-grid"></div>
+    </div>
+  </div>
+
+  <!-- Bottom HUD -->
+  <div id="bottom-hud" class="glass-panel">
+    <div id="hud-mode-text">
+      <strong>Mode:</strong> Exterior Orbit • <span class="kbd">Left-Drag</span> Rotate • <span class="kbd">Right-Drag</span> Pan • <span class="kbd">Scroll</span> Zoom
+    </div>
+    <div style="border-left:1px solid rgba(255,255,255,0.15); padding-left:14px;" id="hud-selection-text">
+      <strong>Selected Surface:</strong> <span style="color:var(--accent)">Exterior Main Walls</span> (Click any 3D wall/frame to paint)
+    </div>
+  </div>
+
+  <!-- Three.js r128 + OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <script>
+    // ============================================================================
+    // 1. OFFICIAL ASIAN PAINTS SHADE DATABASE
+    // ============================================================================
+    const ASIAN_PAINTS_SHADES = [
+      // Off-Whites & High LRV Emulsions
+      { name: "Innocent White", code: "L180", hex: "#F3EFE6", group: "Off-White" },
+      { name: "Morning Glory", code: "0765", hex: "#FAF7EF", group: "Off-White" },
+      { name: "Canvas Cream", code: "0313", hex: "#EAE6DD", group: "Off-White" },
+      { name: "Cream Pie", code: "L152", hex: "#F6F3EC", group: "Off-White" },
+      { name: "Absolute White", code: "L161", hex: "#FFFFFF", group: "Off-White" },
+      // Earth Tones, Mocha & Taupes
+      { name: "Sand Drift", code: "8461", hex: "#C4B59D", group: "Earth" },
+      { name: "Camel Skin", code: "8515", hex: "#C89B61", group: "Earth" },
+      { name: "Mushroom", code: "8470", hex: "#9D9484", group: "Earth" },
+      { name: "Raw Jute", code: "8513", hex: "#AFA89B", group: "Earth" },
+      { name: "Nut Brown-N", code: "0419", hex: "#5E4632", group: "Earth" },
+      { name: "Almond Frost", code: "0957", hex: "#DFD5C6", group: "Earth" },
+      // Subtle Pastels
+      { name: "Aqua Hint", code: "L114", hex: "#D8EAE6", group: "Pastel" },
+      { name: "Lilac Breeze", code: "7188", hex: "#E5DDEB", group: "Pastel" },
+      { name: "Lavender Lace", code: "7156", hex: "#E8E1E8", group: "Pastel" },
+      { name: "Gem Stone", code: "7172", hex: "#D9DFE3", group: "Pastel" },
+      // Deep Contrasts & Architectural Materials
+      { name: "Thundercloud", code: "8305", hex: "#474B4E", group: "Contrast" },
+      { name: "Charcoal Grey", code: "8297", hex: "#383A3C", group: "Contrast" },
+      { name: "Pewter", code: "8298", hex: "#606466", group: "Contrast" },
+      { name: "Teak Plank", code: "WOOD", hex: "#985934", group: "Material" },
+      { name: "Black Granite", code: "GRAN", hex: "#1E2022", group: "Material" }
+    ];
+
+    const CATEGORY_LABELS = {
+      ext_main: "Exterior Main Walls",
+      box_grooves: "Window Box Chajjas & Grooves",
+      parapet_box: "Parapet Cutout Accent Frame",
+      pillar_plinth: "Porch Circular Pillar & Plinth",
+      porch_wood: "Porch Teak Wall & Fluted Ceiling",
+      stone_niche: "Split-Face Stone Cladding Niche",
+      int_living: "Living & Passage Interior Walls",
+      int_master: "Master Bedroom Interior Walls",
+      int_bed23: "Bedrooms 2 & 3 Accent Walls",
+      int_kitchen: "Kitchen & Puja Ghar Walls"
+    };
+
+    // ============================================================================
+    // 2. CORE THREE.JS SCENE, CAMERA & RENDERER SETUP
+    // ============================================================================
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xdfe6ec); // Soft daylight haze (sky dome draws over it)
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.5, 500);
+    camera.position.set(54, 24, 58);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.08;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.target.set(0, 6.5, 0);
+    controls.maxDistance = 170;
+    controls.minDistance = 2;
+
+    // ============================================================================
+    // 3. ARCHITECTURAL LIGHTING SYSTEM (realistic daylight)
+    // ============================================================================
+    // Sky dome with soft vertical gradient + subtle sun glow (toggleable)
+    const skyDome = (function () {
+      const c = document.createElement('canvas');
+      c.width = 64; c.height = 512;
+      const ctx = c.getContext('2d');
+      const g = ctx.createLinearGradient(0, 0, 0, 512);
+      g.addColorStop(0.0, '#5b93c8');   // zenith blue
+      g.addColorStop(0.42, '#9ec2e2');
+      g.addColorStop(0.68, '#cfe1ee');
+      g.addColorStop(0.82, '#e9ecef');  // horizon haze
+      g.addColorStop(1.0, '#e2e4e6');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 64, 512);
+      const tex = new THREE.CanvasTexture(c);
+      const dome = new THREE.Mesh(
+        new THREE.SphereGeometry(320, 24, 18),
+        new THREE.MeshBasicMaterial({ map: tex, side: THREE.BackSide, fog: false })
+      );
+      return dome;
+    })();
+    scene.add(skyDome);
+
+    // Image-based lighting environment (PMREM from a soft gradient) so metals,
+    // glass and granite read realistically instead of dead-flat
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    pmrem.compileEquirectangularShader();
+    const envCanvas = document.createElement('canvas');
+    envCanvas.width = 128; envCanvas.height = 64;
+    (function () {
+      const c = envCanvas.getContext('2d');
+      const g = c.createLinearGradient(0, 0, 0, 64);
+      g.addColorStop(0, '#cfe0f0');
+      g.addColorStop(0.5, '#e8ecef');
+      g.addColorStop(0.55, '#b9b3a6');
+      g.addColorStop(1, '#6f6a5e');
+      c.fillStyle = g;
+      c.fillRect(0, 0, 128, 64);
+      c.fillStyle = 'rgba(255,246,224,0.95)';
+      c.beginPath(); c.arc(96, 14, 7, 0, Math.PI * 2); c.fill(); // sun glow
+    })();
+    const envTex = new THREE.CanvasTexture(envCanvas);
+    envTex.mapping = THREE.EquirectangularReflectionMapping;
+    scene.environment = pmrem.fromEquirectangular(envTex).texture;
+    envTex.dispose();
+    pmrem.dispose();
+
+    const hemiLight = new THREE.HemisphereLight(0xdfeaf5, 0x8b8574, 0.62);
+    hemiLight.position.set(0, 60, 0);
+    scene.add(hemiLight);
+
+    // Warm late-morning EAST sun (soft shadows, matches site render lighting)
+    const dirLight = new THREE.DirectionalLight(0xfff3dd, 1.35);
+    dirLight.position.set(62, 74, 52);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.camera.near = 10;
+    dirLight.shadow.camera.far = 200;
+    const d = 46;
+    dirLight.shadow.camera.left = -d;
+    dirLight.shadow.camera.right = d;
+    dirLight.shadow.camera.top = d;
+    dirLight.shadow.camera.bottom = -d;
+    dirLight.shadow.bias = -0.0004;
+    dirLight.shadow.radius = 3.2;   // soft shadow penumbra (PCFSoft)
+    scene.add(dirLight);
+    scene.fog = new THREE.Fog(0xdfe6ec, 150, 330);
+
+    // Soft cool Fill Light from the west
+    const fillLight = new THREE.DirectionalLight(0xdbeafe, 0.3);
+    fillLight.position.set(-45, 30, -40);
+    scene.add(fillLight);
+
+    // Warm 3000K Architectural Up-Down Sconce Light on the Stone Niche
+    const sconceLightUp = new THREE.PointLight(0xffb454, 0.9, 14);
+    sconceLightUp.position.set(19.3, 8.8, -4.0);
+    scene.add(sconceLightUp);
+
+    const sconceLightDown = new THREE.PointLight(0xffb454, 0.9, 14);
+    sconceLightDown.position.set(19.3, 6.5, -4.0);
+    scene.add(sconceLightDown);
+
+    // Porch warm ceiling downlights (under the lighter wood louver ceiling)
+    const porchLight = new THREE.PointLight(0xffe0b2, 0.7, 20);
+    porchLight.position.set(8.25, 11.0, 18.5);
+    scene.add(porchLight);
+
+    // Interior gentle illumination for walk-inside mode (positions per new plan)
+    const interiorLightsGroup = new THREE.Group();
+    const roomLightCoords = [
+      [7.5, 11.0, 3.0],    // Living Room
+      [-9.0, 11.0, 18.5],  // Kitchen
+      [11.5, 11.0, -13.0], // Master Bedroom
+      [-10.5, 11.0, 6.5],  // Bedroom 2
+      [-10.5, 11.0, -18.5],// Bedroom 3
+      [1.2, 11.0, -10.0],  // Central Passage
+      [-12.0, 10.6, -2.5], // Bed 2 attached washroom
+      [2.6, 10.6, -18.5]   // Common washroom (3 sections)
+    ];
+    roomLightCoords.forEach(([lx, ly, lz]) => {
+      const pl = new THREE.PointLight(0xfff5e4, 0.42, 24);
+      pl.position.set(lx, ly, lz);
+      interiorLightsGroup.add(pl);
+    });
+    scene.add(interiorLightsGroup);
+
+    // ============================================================================
+    // 4. PROCEDURAL TEXTURES (TEAK WOOD, SPLIT-FACE STONE, TILES, GRANITE)
+    // ============================================================================
+    // Dark wood-coloured plank tiles for the porch walls (fixed finish - must stay dark teak)
+    function createTeakPlankTexture(baseHex) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = baseHex;
+      ctx.fillRect(0, 0, 512, 512);
+
+      // Horizontal plank courses with realistic grain streaks
+      const rows = 10;
+      const rowH = 512 / rows;
+      for (let i = 0; i < rows; i++) {
+        const tone = (Math.random() - 0.5) * 22;
+        ctx.fillStyle = tone > 0 ? `rgba(255,225,190,${tone / 320})` : `rgba(20,8,0,${-tone / 260})`;
+        ctx.fillRect(0, i * rowH, 512, rowH);
+
+        // Long wavy grain streaks per plank
+        for (let g = 0; g < 9; g++) {
+          const gy = i * rowH + Math.random() * rowH;
+          const dark = 0.05 + Math.random() * 0.12;
+          ctx.strokeStyle = `rgba(25,10,2,${dark})`;
+          ctx.lineWidth = 0.6 + Math.random() * 1.4;
+          ctx.beginPath();
+          ctx.moveTo(0, gy);
+          for (let px = 0; px <= 512; px += 32) {
+            ctx.lineTo(px, gy + Math.sin(px * 0.02 + g * 3 + i) * 1.8);
+          }
+          ctx.stroke();
+        }
+
+        // Plank joint line + staggered vertical joints
+        ctx.strokeStyle = 'rgba(18,8,2,0.5)';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(0, i * rowH);
+        ctx.lineTo(512, i * rowH);
+        ctx.stroke();
+        const jointX = ((i * 173) % 400) + 50;
+        ctx.beginPath();
+        ctx.moveTo(jointX, i * rowH);
+        ctx.lineTo(jointX, (i + 1) * rowH);
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(2, 2);
+      return tex;
+    }
+
+    // Slightly lighter wood tone for the porch ceiling (complements the dark tiled walls)
+    function createLightWoodCeilingTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#B0764A';
+      ctx.fillRect(0, 0, 512, 512);
+      // Fluted wooden louver strips running across the ceiling
+      const strips = 14;
+      const sh = 512 / strips;
+      for (let i = 0; i < strips; i++) {
+        const grad = ctx.createLinearGradient(0, i * sh, 0, (i + 1) * sh);
+        grad.addColorStop(0, 'rgba(255,214,170,0.20)');
+        grad.addColorStop(0.5, 'rgba(120,70,35,0.10)');
+        grad.addColorStop(1, 'rgba(70,38,15,0.28)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, i * sh, 512, sh);
+        ctx.strokeStyle = 'rgba(60,30,12,0.45)';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(0, i * sh);
+        ctx.lineTo(512, i * sh);
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(3, 2);
+      return tex;
+    }
+
+    function createSplitStoneTexture(baseHex) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = baseHex;
+      ctx.fillRect(0, 0, 256, 512);
+      const courses = 32;
+      const ch = 512 / courses;
+      for (let r = 0; r < courses; r++) {
+        const shade = (Math.random() - 0.5) * 35;
+        ctx.fillStyle = shade > 0 ? `rgba(255,255,255,${shade/255})` : `rgba(0,0,0,${-shade/255})`;
+        ctx.fillRect(0, r * ch, 256, ch - 1);
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.fillRect(0, (r + 1) * ch - 1.5, 256, 1.5);
+      }
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(1.5, 3);
+      return tex;
+    }
+
+    // Large-format vitrified floor tiles (2'x2') with subtle marbling + grout lines
+    function createFloorTileTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#EDEAE3';
+      ctx.fillRect(0, 0, 512, 512);
+      for (let i = 0; i < 26; i++) {
+        const x = Math.random() * 512, y = Math.random() * 512;
+        const rad = 30 + Math.random() * 90;
+        const g = ctx.createRadialGradient(x, y, 2, x, y, rad);
+        const grey = 190 + Math.random() * 50;
+        g.addColorStop(0, `rgba(${grey},${grey - 4},${grey - 12},0.16)`);
+        g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(x, y, rad, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      for (let i = 0; i < 10; i++) {
+        ctx.strokeStyle = `rgba(160,155,148,${0.05 + Math.random() * 0.07})`;
+        ctx.lineWidth = 0.8 + Math.random() * 1.2;
+        ctx.beginPath();
+        const sy = Math.random() * 512;
+        ctx.moveTo(0, sy);
+        ctx.bezierCurveTo(170, sy + (Math.random() - 0.5) * 90, 340, sy + (Math.random() - 0.5) * 90, 512, sy + (Math.random() - 0.5) * 60);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = 'rgba(150,146,140,0.55)';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(1.5, 1.5, 509, 509);
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(8, 8);
+      tex.anisotropy = 4;
+      return tex;
+    }
+
+    // Light anti-skid porch floor tile
+    function createPorchFloorTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#D9D6CE';
+      ctx.fillRect(0, 0, 256, 256);
+      for (let i = 0; i < 900; i++) {
+        const x = Math.random() * 256, y = Math.random() * 256;
+        ctx.fillStyle = `rgba(${120 + Math.random() * 60},${118 + Math.random() * 60},${112 + Math.random() * 60},0.10)`;
+        ctx.fillRect(x, y, 2, 2);
+      }
+      ctx.strokeStyle = 'rgba(140,136,128,0.5)';
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(1, 1, 254, 254);
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(9, 6);
+      tex.anisotropy = 4;
+      return tex;
+    }
+
+    // Black granite with quartz speckle (steps, kitchen counter)
+    function createGraniteTexture(light) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = light ? '#2E3033' : '#16181B';
+      ctx.fillRect(0, 0, 256, 256);
+      for (let i = 0; i < 1400; i++) {
+        const x = Math.random() * 256, y = Math.random() * 256;
+        const b = Math.random();
+        if (b > 0.86) ctx.fillStyle = 'rgba(225,228,232,0.75)';
+        else if (b > 0.6) ctx.fillStyle = 'rgba(120,126,134,0.5)';
+        else ctx.fillStyle = 'rgba(60,64,70,0.5)';
+        ctx.fillRect(x, y, 1 + Math.random() * 1.6, 1 + Math.random() * 1.6);
+      }
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(2, 2);
+      return tex;
+    }
+
+    // Subtle neutral wood-grain overlay (multiplied by the material colour)
+    function createWoodGrainTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256; canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, 256, 256);
+      for (let i = 0; i < 46; i++) {
+        const y0 = Math.random() * 256;
+        const dark = 0.05 + Math.random() * 0.1;
+        ctx.strokeStyle = `rgba(70,40,18,${dark})`;
+        ctx.lineWidth = 0.7 + Math.random() * 1.6;
+        ctx.beginPath();
+        ctx.moveTo(0, y0);
+        for (let px = 0; px <= 256; px += 24) {
+          ctx.lineTo(px, y0 + Math.sin(px * 0.03 + i) * 2.2);
+        }
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(2, 2);
+      return tex;
+    }
+
+    // Very subtle fabric weave (multiplied by the material colour)
+    function createFabricTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128; canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, 128, 128);
+      for (let i = 0; i < 500; i++) {
+        const x = Math.random() * 128, y = Math.random() * 128;
+        const v = Math.random() > 0.5 ? 235 : 255;
+        ctx.fillStyle = `rgba(${v},${v},${v},0.35)`;
+        ctx.fillRect(x, y, 2, 1);
+      }
+      ctx.strokeStyle = 'rgba(190,185,178,0.10)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 128; i += 6) {
+        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(128, i); ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(4, 4);
+      return tex;
+    }
+
+    // Very subtle wall-plaster noise so painted walls are not dead flat
+    function createPlasterTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, 256, 256);
+      for (let i = 0; i < 1500; i++) {
+        const x = Math.random() * 256, y = Math.random() * 256;
+        const v = Math.random() > 0.5 ? 255 : 190;
+        ctx.fillStyle = `rgba(${v},${v},${v},0.045)`;
+        ctx.fillRect(x, y, 1.6, 1.6);
+      }
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(4, 4);
+      return tex;
+    }
+
+    // Lawn grass texture
+    function createGrassTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#44603a';
+      ctx.fillRect(0, 0, 256, 256);
+      for (let i = 0; i < 2600; i++) {
+        const x = Math.random() * 256, y = Math.random() * 256;
+        const g = 70 + Math.random() * 70;
+        ctx.strokeStyle = `rgba(${g - 20},${g + 30},${g - 30},0.5)`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + (Math.random() - 0.5) * 3, y - 2 - Math.random() * 3);
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(30, 30);
+      return tex;
+    }
+
+    // ============================================================================
+    // 5. MATERIAL REGISTRY & CLAY MODE CONTROLLER
+    // ============================================================================
+    const CLAY_PALETTE = {
+      ext_main: "#EEEEEE",
+      box_grooves: "#E2E2E2",
+      parapet_box: "#DEDEDE",
+      pillar_plinth: "#D8D8D8",
+      porch_wood: "#E4E4E4",
+      stone_niche: "#DADADA",
+      int_living: "#EFEFEF",
+      int_master: "#EAEAEA",
+      int_bed23: "#E8E8E8",
+      int_kitchen: "#ECECEC",
+      granite_steps: "#D0D0D0",
+      slab_trim: "#E5E5E5"
+    };
+
+    const materials = {};
+    Object.keys(CLAY_PALETTE).forEach(key => {
+      materials[key] = new THREE.MeshStandardMaterial({
+        color: CLAY_PALETTE[key],
+        roughness: 0.85,
+        metalness: 0.04
+      });
+      materials[key].userData = { category: key };
+    });
+
+    // Special constant materials for glass, window grilles, fixtures
+    const glassMat = new THREE.MeshPhysicalMaterial({
+      color: 0x9fc3dd,
+      transparent: true,
+      opacity: 0.38,
+      roughness: 0.08,
+      metalness: 0.05,
+      reflectivity: 0.6
+    });
+    const grilleMat = new THREE.MeshStandardMaterial({ color: 0x2a2d33, roughness: 0.45, metalness: 0.45 });
+    const doorWoodMat = new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.62 });
+    const floorTileMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.32, metalness: 0.02, map: createFloorTileTexture() });
+    const porchFloorMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, map: createPorchFloorTexture() });
+    const fixtureMat = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.25 });
+    const graniteStepMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, metalness: 0.15, map: createGraniteTexture(false) });
+    const counterGraniteMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.22, metalness: 0.2, map: createGraniteTexture(true) });
+    const porchCeilWoodMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.55, metalness: 0.0, map: createLightWoodCeilingTexture() });
+    const cabinetMat = new THREE.MeshStandardMaterial({ color: 0x8d9aa4, roughness: 0.4, metalness: 0.1 });
+    const applianceSteelMat = new THREE.MeshStandardMaterial({ color: 0xc4c9cf, roughness: 0.3, metalness: 0.55 });
+    const applianceDarkMat = new THREE.MeshStandardMaterial({ color: 0x33363b, roughness: 0.4, metalness: 0.4 });
+    const hobBlackMat = new THREE.MeshStandardMaterial({ color: 0x14161a, roughness: 0.28, metalness: 0.3 });
+    const woodGrainMap = createWoodGrainTexture();
+    const fabricWeaveMap = createFabricTexture();
+    const furnitureWoodMat = new THREE.MeshStandardMaterial({ color: 0x9a663c, roughness: 0.5, map: woodGrainMap });
+    const walnutMat = new THREE.MeshStandardMaterial({ color: 0x6b4a30, roughness: 0.45, map: woodGrainMap });
+    const fabricGreyMat = new THREE.MeshStandardMaterial({ color: 0x8f959c, roughness: 0.92, map: fabricWeaveMap });
+    const fabricBeigeMat = new THREE.MeshStandardMaterial({ color: 0xc4b9a6, roughness: 0.92, map: fabricWeaveMap });
+    const fabricAccentMat = new THREE.MeshStandardMaterial({ color: 0xb5623a, roughness: 0.9, map: fabricWeaveMap });
+    const mattressMat = new THREE.MeshStandardMaterial({ color: 0xe8e4da, roughness: 0.9, map: fabricWeaveMap });
+    const duvetMat = new THREE.MeshStandardMaterial({ color: 0xd7cfc2, roughness: 0.95, map: fabricWeaveMap });
+    const popMat = new THREE.MeshStandardMaterial({ color: 0xf7f6f2, roughness: 0.6 });
+    const coveLightMat = new THREE.MeshStandardMaterial({ color: 0xfff2d8, emissive: 0xffdf9e, emissiveIntensity: 0.85, roughness: 0.4 });
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xdfe3e7, roughness: 0.15, metalness: 0.8 });
+    const fanBladeMat = new THREE.MeshStandardMaterial({ color: 0x7a5533, roughness: 0.5, map: woodGrainMap });
+    const tvMat = new THREE.MeshStandardMaterial({ color: 0x101216, roughness: 0.25, metalness: 0.4 });
+    const marbleMat = new THREE.MeshStandardMaterial({ color: 0xf2efe9, roughness: 0.18, metalness: 0.05 });
+    const plantSoilMat = new THREE.MeshStandardMaterial({ color: 0x3d2f24, roughness: 0.95 });
+    const leafMatA = new THREE.MeshStandardMaterial({ color: 0x3f7233, roughness: 0.8 });
+    const leafMatB = new THREE.MeshStandardMaterial({ color: 0x528a3f, roughness: 0.8 });
+    const leafMatC = new THREE.MeshStandardMaterial({ color: 0x2e5c28, roughness: 0.82 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x6d5136, roughness: 0.9 });
+    const terracottaMat = new THREE.MeshStandardMaterial({ color: 0xa5673f, roughness: 0.85 });
+    const showerGlassMat = new THREE.MeshPhysicalMaterial({ color: 0xcfe0e8, transparent: true, opacity: 0.25, roughness: 0.05, metalness: 0.05 });
+    const mirrorMat = new THREE.MeshStandardMaterial({ color: 0xd4dde2, roughness: 0.06, metalness: 0.85 });
+    const wallPaintNoise = createPlasterTexture();
+
+    // Track paintable meshes for raycasting
+    const paintableMeshes = [];
+    const edgeLinesGroup = new THREE.Group();
+    scene.add(edgeLinesGroup);
+
+    // ============================================================================
+    // 6. GEOMETRY BUILDER UTILITIES (1 UNIT = 1 FOOT)
+    // ============================================================================
+    // Coordinate System:
+    // Plot Width (X): -18.5' (North/Left) to +18.5' (South/Right) = 37' 0"
+    // Plot Length (Z): -25.0' (West/Rear) to +25.0' (East/Front) = 50' 0"
+    // Ground Y = 0.0' | Plinth Top Y = 2.5' | Clear Ceiling Y = 13.0' | Main Roof Slab Top Y = 13.5'
+
+    const houseGroup = new THREE.Group();
+    const roofGroup = new THREE.Group();
+    const groundGroup = new THREE.Group();
+    scene.add(houseGroup);
+    scene.add(roofGroup);
+    scene.add(groundGroup);
+
+    const edgeMat = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.14 });
+
+    function addBox(x1, x2, y1, y2, z1, z2, matKeyOrMat, parent = houseGroup, addEdges = true) {
+      const w = Math.abs(x2 - x1);
+      const h = Math.abs(y2 - y1);
+      const d = Math.abs(z2 - z1);
+      if (w < 0.001 || h < 0.001 || d < 0.001) return null;
+
+      const geo = new THREE.BoxGeometry(w, h, d);
+      const mat = typeof matKeyOrMat === 'string' ? materials[matKeyOrMat] : matKeyOrMat;
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set((x1 + x2) / 2, (y1 + y2) / 2, (z1 + z2) / 2);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+
+      if (typeof matKeyOrMat === 'string' && CATEGORY_LABELS[matKeyOrMat]) {
+        mesh.userData.category = matKeyOrMat;
+        paintableMeshes.push(mesh);
+      }
+
+      parent.add(mesh);
+
+      if (addEdges) {
+        const edges = new THREE.EdgesGeometry(geo);
+        const line = new THREE.LineSegments(edges, edgeMat);
+        mesh.add(line);
+      }
+      return mesh;
+    }
+
+    /**
+     * Builds a wall along Either X or Z axis with rectangular openings (doors/windows/vents).
+     * Openings array: [{ pos: centerCoordAlongAxis, width: w, bottom: yBottom, top: yTop, type: 'window'|'door'|'open'|'vent' }]
+     */
+    function buildSegmentedWall(axis, fixedCoord, startCoord, endCoord, yBottom, yTop, thickness, matKey, openings = [], parent = houseGroup) {
+      const sorted = [...openings].sort((a, b) => (a.pos - a.width / 2) - (b.pos - b.width / 2));
+      let cursor = startCoord;
+
+      sorted.forEach(op => {
+        const opStart = op.pos - op.width / 2;
+        const opEnd = op.pos + op.width / 2;
+
+        // Solid wall segment before opening
+        if (opStart > cursor + 0.01) {
+          if (axis === 'x') {
+            addBox(cursor, opStart, yBottom, yTop, fixedCoord - thickness / 2, fixedCoord + thickness / 2, matKey, parent);
+          } else {
+            addBox(fixedCoord - thickness / 2, fixedCoord + thickness / 2, yBottom, yTop, cursor, opStart, matKey, parent);
+          }
+        }
+
+        // Sill below opening
+        if (op.bottom > yBottom + 0.01) {
+          if (axis === 'x') {
+            addBox(opStart, opEnd, yBottom, op.bottom, fixedCoord - thickness / 2, fixedCoord + thickness / 2, matKey, parent);
+          } else {
+            addBox(fixedCoord - thickness / 2, fixedCoord + thickness / 2, yBottom, op.bottom, opStart, opEnd, matKey, parent);
+          }
+        }
+
+        // Lintel/header above opening
+        if (op.top < yTop - 0.01) {
+          if (axis === 'x') {
+            addBox(opStart, opEnd, op.top, yTop, fixedCoord - thickness / 2, fixedCoord + thickness / 2, matKey, parent);
+          } else {
+            addBox(fixedCoord - thickness / 2, fixedCoord + thickness / 2, op.top, yTop, opStart, opEnd, matKey, parent);
+          }
+        }
+
+        // Insert window glass & security grille or door leaf
+        if (op.type === 'window' || op.type === 'vent') {
+          buildWindowAssembly(axis, fixedCoord, op.pos, op.width, op.bottom, op.top, thickness, parent);
+        } else if (op.type === 'door' || op.type === 'double_door') {
+          buildDoorAssembly(axis, fixedCoord, op.pos, op.width, op.bottom, op.top, thickness, op.type === 'double_door', parent, op.swing);
+        }
+
+        cursor = opEnd;
+      });
+
+      // Final wall segment after last opening
+      if (endCoord > cursor + 0.01) {
+        if (axis === 'x') {
+          addBox(cursor, endCoord, yBottom, yTop, fixedCoord - thickness / 2, fixedCoord + thickness / 2, matKey, parent);
+        } else {
+          addBox(fixedCoord - thickness / 2, fixedCoord + thickness / 2, yBottom, yTop, cursor, endCoord, matKey, parent);
+        }
+      }
+    }
+
+    function buildWindowAssembly(axis, fixedCoord, centerPos, width, yBottom, yTop, wallThick, parent) {
+      // Clean residential window: slim dark frame, glass, ONE centre mullion for wide
+      // openings and up to two thin transom bars (no cage-like grille grid - the
+      // kitchen east window must blend naturally with the facade, correction 1.8)
+      const h = yTop - yBottom;
+      const frameT = 0.14;
+      const mullionMat = grilleMat;
+      const transoms = h > 3.2 ? 2 : (h > 1.8 ? 1 : 0);
+      if (axis === 'x') {
+        addBox(centerPos - width / 2, centerPos + width / 2, yBottom, yTop, fixedCoord - 0.05, fixedCoord + 0.05, glassMat, parent, false);
+        // Slim outer frame
+        addBox(centerPos - width / 2, centerPos + width / 2, yBottom, yBottom + frameT, fixedCoord - wallThick / 2, fixedCoord + wallThick / 2, mullionMat, parent, false);
+        addBox(centerPos - width / 2, centerPos + width / 2, yTop - frameT, yTop, fixedCoord - wallThick / 2, fixedCoord + wallThick / 2, mullionMat, parent, false);
+        addBox(centerPos - width / 2, centerPos - width / 2 + frameT, yBottom, yTop, fixedCoord - 0.09, fixedCoord + 0.09, mullionMat, parent, false);
+        addBox(centerPos + width / 2 - frameT, centerPos + width / 2, yBottom, yTop, fixedCoord - 0.09, fixedCoord + 0.09, mullionMat, parent, false);
+        // Single centre mullion only for wide openings
+        if (width >= 4.5) {
+          addBox(centerPos - 0.05, centerPos + 0.05, yBottom, yTop, fixedCoord - 0.07, fixedCoord + 0.07, mullionMat, parent, false);
+        }
+        // Thin horizontal transom bars
+        for (let i = 1; i <= transoms; i++) {
+          const by = yBottom + (h / (transoms + 1)) * i;
+          addBox(centerPos - width / 2 + 0.05, centerPos + width / 2 - 0.05, by - 0.035, by + 0.035, fixedCoord - 0.06, fixedCoord + 0.06, mullionMat, parent, false);
+        }
+      } else {
+        addBox(fixedCoord - 0.05, fixedCoord + 0.05, yBottom, yTop, centerPos - width / 2, centerPos + width / 2, glassMat, parent, false);
+        addBox(fixedCoord - wallThick / 2, fixedCoord + wallThick / 2, yBottom, yBottom + frameT, centerPos - width / 2, centerPos + width / 2, mullionMat, parent, false);
+        addBox(fixedCoord - wallThick / 2, fixedCoord + wallThick / 2, yTop - frameT, yTop, centerPos - width / 2, centerPos + width / 2, mullionMat, parent, false);
+        addBox(fixedCoord - 0.09, fixedCoord + 0.09, yBottom, yTop, centerPos - width / 2, centerPos - width / 2 + frameT, mullionMat, parent, false);
+        addBox(fixedCoord - 0.09, fixedCoord + 0.09, yBottom, yTop, centerPos + width / 2 - frameT, centerPos + width / 2, mullionMat, parent, false);
+        if (width >= 4.5) {
+          addBox(fixedCoord - 0.07, fixedCoord + 0.07, yBottom, yTop, centerPos - 0.05, centerPos + 0.05, mullionMat, parent, false);
+        }
+        for (let i = 1; i <= transoms; i++) {
+          const by = yBottom + (h / (transoms + 1)) * i;
+          addBox(fixedCoord - 0.06, fixedCoord + 0.06, by - 0.035, by + 0.035, centerPos - width / 2 + 0.05, centerPos + width / 2 - 0.05, mullionMat, parent, false);
+        }
+      }
+    }
+
+    function buildDoorAssembly(axis, fixedCoord, centerPos, width, yBottom, yTop, wallThick, isDouble, parent, swing) {
+      const frameW = 0.22;
+      const leafH = yTop - yBottom - frameW;
+      const openAng = 0.62; // ~35 degrees ajar - shows realistic swing clearance
+      const sw = swing || 1;
+
+      function addLeaf(hingeX, hingeZ, leafW, dirX, dirZ, angSign) {
+        // A door leaf hung on a hinge pivot, swung part-way open
+        const pivot = new THREE.Group();
+        pivot.position.set(hingeX, yBottom, hingeZ);
+        const leaf = new THREE.Mesh(new THREE.BoxGeometry(leafW, leafH, 0.14), doorWoodMat);
+        leaf.position.set(dirX * leafW / 2, leafH / 2 + frameW * 0.5, 0);
+        leaf.castShadow = true;
+        pivot.add(leaf);
+        // Lever handle on both faces
+        const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8), chromeMat);
+        handle.rotation.x = Math.PI / 2;
+        handle.position.set(dirX * (leafW - 0.45), leafH / 2, 0.16);
+        pivot.add(handle);
+        const handle2 = handle.clone();
+        handle2.position.z = -0.16;
+        pivot.add(handle2);
+        pivot.rotation.y = angSign * openAng;
+        parent.add(pivot);
+        return pivot;
+      }
+
+      if (axis === 'x') {
+        // Door frame jambs & header
+        addBox(centerPos - width / 2, centerPos - width / 2 + frameW, yBottom, yTop, fixedCoord - wallThick / 2 - 0.05, fixedCoord + wallThick / 2 + 0.05, grilleMat, parent, false);
+        addBox(centerPos + width / 2 - frameW, centerPos + width / 2, yBottom, yTop, fixedCoord - wallThick / 2 - 0.05, fixedCoord + wallThick / 2 + 0.05, grilleMat, parent, false);
+        addBox(centerPos - width / 2, centerPos + width / 2, yTop - frameW, yTop, fixedCoord - wallThick / 2 - 0.05, fixedCoord + wallThick / 2 + 0.05, grilleMat, parent, false);
+        // Ajar leaves (leaf swings around the Y axis; sw selects which side of the wall)
+        const leafW = width - 2 * frameW;
+        if (isDouble) {
+          addLeaf(centerPos - width / 2 + frameW, fixedCoord + 0.02 * sw, leafW / 2 - 0.05, 1, 0, sw > 0 ? -openAng : openAng);
+          addLeaf(centerPos + width / 2 - frameW, fixedCoord + 0.02 * sw, leafW / 2 - 0.05, -1, 0, sw > 0 ? openAng : -openAng);
+        } else {
+          addLeaf(centerPos - width / 2 + frameW, fixedCoord + 0.02 * sw, leafW, 1, 0, sw > 0 ? -openAng : openAng);
+        }
+      } else {
+        addBox(fixedCoord - wallThick / 2 - 0.05, fixedCoord + wallThick / 2 + 0.05, yBottom, yTop, centerPos - width / 2, centerPos - width / 2 + frameW, grilleMat, parent, false);
+        addBox(fixedCoord - wallThick / 2 - 0.05, fixedCoord + wallThick / 2 + 0.05, yBottom, yTop, centerPos + width / 2 - frameW, centerPos + width / 2, grilleMat, parent, false);
+        addBox(fixedCoord - wallThick / 2 - 0.05, fixedCoord + wallThick / 2 + 0.05, yBottom, yTop, centerPos - width / 2, centerPos + width / 2, grilleMat, parent, false);
+        const leafW = width - 2 * frameW;
+        // For z-axis walls the leaf is rotated 90 deg first, then swung
+        const pivot = new THREE.Group();
+        pivot.position.set(fixedCoord + 0.02 * sw, yBottom, centerPos - width / 2 + frameW);
+        const leaf = new THREE.Mesh(new THREE.BoxGeometry(0.14, leafH, leafW), doorWoodMat);
+        leaf.position.set(0, leafH / 2 + frameW * 0.5, leafW / 2);
+        leaf.castShadow = true;
+        pivot.add(leaf);
+        const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8), chromeMat);
+        handle.rotation.z = Math.PI / 2;
+        handle.position.set(0.16, leafH / 2, leafW - 0.45);
+        pivot.add(handle);
+        const handle2 = handle.clone();
+        handle2.position.x = -0.16;
+        pivot.add(handle2);
+        pivot.rotation.y = (sw > 0 ? 1 : -1) * openAng;
+        parent.add(pivot);
+      }
+    }
+
+    // ============================================================================
+    // 7. CONSTRUCT THE 37' × 50' GROUND-TRUTH VILLA
+    // ============================================================================
+    function buildVillaModel() {
+      const Y_PLINTH = 2.5;
+      const Y_CEIL = 13.0;     // 10' 6" clear height above 2.5' plinth
+      const Y_SLAB = 13.5;     // 6" slab thickness
+      const WT = 0.75;         // 9" exterior wall thickness
+      const IT = 0.5;          // 6" interior partition wall thickness
+
+      // -------------------------------------------------------------------------
+      // A. PLINTH, FLOOR SLABS & FRONT BLACK GRANITE STEPS
+      // -------------------------------------------------------------------------
+      // Main Plinth Base (-18.5 to +18.5, Z: -25 to +25)
+      addBox(-18.5, 18.5, 0, Y_PLINTH, -25.0, 25.0, 'pillar_plinth');
+      // Interior Floor Finish - living/bedrooms/passage zone
+      addBox(-18.1, 18.1, Y_PLINTH, Y_PLINTH + 0.08, -24.6, 12.1, floorTileMat);
+      // Kitchen Floor (18' wide x 12' deep, X = -18.1 .. +0.2)
+      addBox(-18.1, 0.2, Y_PLINTH, Y_PLINTH + 0.08, 12.1, 24.6, floorTileMat);
+      // Porch Floor Finish (Light Vitrified Tiles from site photo WhatsApp 2026-10-05)
+      addBox(0.2, 18.5, Y_PLINTH, Y_PLINTH + 0.08, 12.1, 25.0, porchFloorMat);
+
+      // 4 Black Granite Entrance Steps on East Front of Porch (Z = 25.0 to 28.6)
+      for (let s = 0; s < 4; s++) {
+        const stepH = (Y_PLINTH / 4) * (s + 1);
+        const zStart = 28.6 - (s + 1) * 0.9;
+        const zEnd = 28.6 - s * 0.9;
+        addBox(5.5, 14.5, 0, stepH, zStart, zEnd, 'granite_steps');
+      }
+
+      // Perimeter Landscape Planter Box on South & East (from Rendered Reference photo)
+      addBox(18.5, 20.5, 0, 1.4, -25.0, 12.5, 'box_grooves');
+      addBox(-18.5, 0.2, 0, 1.4, 25.0, 26.8, 'box_grooves');
+
+      // -------------------------------------------------------------------------
+      // B. EXTERIOR PERIMETER WALLS (ALL 4 ELEVATIONS)
+      // -------------------------------------------------------------------------
+
+      // 1. EAST ELEVATION (Front Kitchen Wall: X = -18.5 to +0.6 at Z = +25.0)
+      // ONE proper east-facing kitchen window, centered (incorrect narrow vertical
+      // slit windows removed per correction sheet 1.8)
+      buildSegmentedWall('x', 24.625, -18.5, 0.6, Y_PLINTH, Y_CEIL, WT, 'ext_main', [
+        { pos: -9.0, width: 4.5, bottom: 5.5, top: 9.8, type: 'window' } // Kitchen East Window (blends with facade)
+      ]);
+
+      // Horizontal recessed plaster bands on Kitchen East Front Wall (seen in site photos)
+      for (let gy = 3.6; gy <= 12.0; gy += 1.05) {
+        if (gy < 5.3 || gy > 10.0) {
+          addBox(-18.55, 0.6, gy, gy + 0.75, 25.0, 25.12, 'box_grooves');
+        } else {
+          addBox(-18.55, -11.75, gy, gy + 0.75, 25.0, 25.12, 'box_grooves');
+          addBox(-6.25, 0.6, gy, gy + 0.75, 25.0, 25.12, 'box_grooves');
+        }
+      }
+
+      // Projecting Vertical Feature Frame & White Window Box on Kitchen East Wall (Photo 6 & 8)
+      addBox(-11.75, -6.25, 5.1, 14.8, 25.0, 25.9, 'parapet_box'); // Tall vertical feature frame rising above parapet
+      addBox(-11.05, -6.95, 10.0, 14.3, 25.9, 26.05, 'stone_niche'); // Stone cladding above kitchen window
+      // Crisp white projecting box frame around Kitchen East Window
+      addBox(-11.65, -6.35, 5.2, 5.55, 25.0, 26.25, 'ext_main');
+      addBox(-11.65, -6.35, 9.75, 10.1, 25.0, 26.25, 'ext_main');
+      addBox(-11.65, -11.3, 5.2, 10.1, 25.0, 26.25, 'ext_main');
+      addBox(-6.7, -6.35, 5.2, 10.1, 25.0, 26.25, 'ext_main');
+
+      // 2. PORCH WALLS (Clad in dark wood-coloured teak plank tiles - FIXED FINISH, Photo 9)
+      // Porch Back Wall / house front wall facing the porch (X = +0.6 to +18.5 at Z = +12.5)
+      // CORRECTED 1.2: main entrance door on the LEFT side of the porch,
+      // window on the RIGHT side; CORRECTED 1.3: door axis aligned toward rear exit door.
+      buildSegmentedWall('x', 12.5, 0.6, 18.5, Y_PLINTH, Y_CEIL, WT, 'porch_wood', [
+        { pos: 2.7, width: 3.5, bottom: Y_PLINTH, top: 9.8, type: 'double_door', swing: -1 }, // Main Entrance Door (LEFT side, on axis)
+        { pos: 10.5, width: 5.0, bottom: 5.2, top: 9.8, type: 'window' }          // Living Room Window facing Porch (RIGHT side)
+      ]);
+
+      // Porch Left-Side Wall (between pooja ghar/kitchen and porch: X = +0.6, Z = +12.5 to +25.0)
+      // Fully clad in the same dark wood-coloured tiles (fixed finish - Section 3)
+      buildSegmentedWall('z', 0.6, 12.5, 25.0, Y_PLINTH, Y_CEIL, WT, 'porch_wood', []);
+
+      // Single Circular Corner Pillar at Front-Right Porch (X = +17.5, Z = +24.0)
+      const pillarGeo = new THREE.CylinderGeometry(0.65, 0.65, 9.25, 28);
+      const pillarMesh = new THREE.Mesh(pillarGeo, materials['pillar_plinth']);
+      pillarMesh.position.set(17.5, Y_PLINTH + 4.625, 24.0);
+      pillarMesh.castShadow = true;
+      pillarMesh.userData.category = 'pillar_plinth';
+      paintableMeshes.push(pillarMesh);
+      houseGroup.add(pillarMesh);
+      // Pillar Base & Capital Moulding
+      addBox(16.6, 18.4, Y_PLINTH, Y_PLINTH + 0.45, 23.1, 24.9, 'pillar_plinth');
+      addBox(16.6, 18.4, 11.35, 11.75, 23.1, 24.9, 'pillar_plinth');
+
+      // 3. SOUTH ELEVATION (Right Side Wall: Z = -25.0 to +12.5 at X = +18.5)
+      // Matches Site Photos 6 & 8: Corner Pilaster with 6 grooves, 2 Box Windows with lower display ledges, Stone Niche, Rear Toilet Vent
+      buildSegmentedWall('z', 18.125, -25.0, 12.5, Y_PLINTH, Y_CEIL, WT, 'ext_main', [
+        { pos: -22.8, width: 2.0, bottom: 8.2, top: 10.2, type: 'vent' },   // Master Toilet High Ventilator
+        { pos: -12.5, width: 5.0, bottom: 5.8, top: 10.2, type: 'window' }, // Master Bedroom Window
+        { pos: 4.5, width: 5.0, bottom: 5.8, top: 10.2, type: 'window' }    // Living Room Side Window
+      ]);
+
+      // Corner Pilaster at South-East (Z = 10.5 to 12.5) with 6 horizontal recessed grooves
+      for (let i = 0; i < 6; i++) {
+        const gy = 3.4 + i * 1.45;
+        addBox(18.5, 18.7, gy, gy + 1.05, 10.5, 12.55, 'box_grooves');
+      }
+
+      // Two Symmetrical Projecting Concrete Box Windows with Lower Recessed Display Ledges (Z = 4.5 and Z = -12.5)
+      [4.5, -12.5].forEach(wz => {
+        const wHalf = 2.9;
+        const boxDepth = 1.1;
+        // Top, Middle (sill), Bottom ledge, Left & Right projecting box frame
+        addBox(18.5, 18.5 + boxDepth, 10.2, 10.65, wz - wHalf, wz + wHalf, 'box_grooves'); // Top chajja
+        addBox(18.5, 18.5 + boxDepth, 5.4, 5.8, wz - wHalf, wz + wHalf, 'box_grooves');    // Window sill divider
+        addBox(18.5, 18.5 + boxDepth, 3.3, 3.7, wz - wHalf, wz + wHalf, 'box_grooves');    // Lower display shelf base
+        addBox(18.5, 18.5 + boxDepth, 3.3, 10.65, wz - wHalf, wz - wHalf + 0.45, 'box_grooves'); // Left jamb
+        addBox(18.5, 18.5 + boxDepth, 3.3, 10.65, wz + wHalf - 0.45, wz + wHalf, 'box_grooves'); // Right jamb
+        // Recessed backing inside lower display niche
+        addBox(18.5, 18.68, 3.7, 5.4, wz - wHalf + 0.45, wz + wHalf - 0.45, 'box_grooves');
+      });
+
+      // Central Vertical Split-Face Stone Cladding Niche between the 2 Box Windows (Z = -5.2 to -2.8)
+      addBox(18.5, 18.68, 3.3, 10.65, -5.2, -2.8, 'stone_niche');
+      // Dual Up-Down Sconce Fixture Body
+      addBox(18.68, 18.9, 7.3, 7.9, -4.2, -3.8, grilleMat, houseGroup, false);
+
+      // 4. LEFT ELEVATION (Left Side Wall: Z = -25.0 to +25.0 at X = -18.5)
+      // Matches Brick Structural Photo 1 & 2: 5 structural concrete column pilasters, continuous lintel band
+      buildSegmentedWall('z', -18.125, -25.0, 25.0, Y_PLINTH, Y_CEIL, WT, 'ext_main', [
+        { pos: -19.0, width: 4.5, bottom: 5.5, top: 9.8, type: 'window' }, // Bedroom 3 Side Window
+        { pos: -2.5, width: 2.0, bottom: 8.0, top: 9.8, type: 'vent' },    // Attached Toilet (Bed 2) Ventilator
+        { pos: 5.75, width: 4.5, bottom: 5.5, top: 9.8, type: 'window' }, // Bedroom 2 Side Window
+        { pos: 16.0, width: 4.0, bottom: 5.5, top: 9.5, type: 'window' }, // Kitchen Side Window (rear run, over counter)
+        { pos: 22.0, width: 3.0, bottom: 5.5, top: 9.5, type: 'window' }  // Kitchen Side Window (front run, over counter)
+      ]);
+
+      // 5 Structural Column Pilasters along North Wall & Continuous Lintel Band
+      const northColumnsZ = [-24.6, -12.8, -6.8, 8.2, 24.6];
+      northColumnsZ.forEach(cz => {
+        addBox(-18.75, -18.5, 0, Y_CEIL, cz - 0.45, cz + 0.45, 'box_grooves');
+      });
+      // Continuous Lintel Band at Y = 9.8 to 10.5
+      addBox(-18.72, -18.5, 9.8, 10.5, -25.0, 25.0, 'box_grooves');
+
+      // Projecting Window Chajjas & Lower Sills on Left Elevation Windows
+      [-19.0, 5.75, 16.0, 22.0].forEach(wz => {
+        addBox(-19.5, -18.5, 9.8, 10.1, wz - 2.6, wz + 2.6, 'box_grooves'); // Overhang chajja
+        addBox(-19.1, -18.5, 5.2, 5.5, wz - 2.5, wz + 2.5, 'box_grooves');  // Window sill
+        addBox(-19.0, -18.5, 3.4, 3.65, wz - 2.4, wz + 2.4, 'box_grooves'); // Lower drip ledge (from Photo 1)
+      });
+
+      // Projecting Cantilevered Mid-Landing Beam of Staircase on North Wall (Z = -13.0 to -7.0, Photo 1)
+      addBox(-19.6, -18.5, 7.2, 8.2, -13.2, -6.8, 'box_grooves');
+
+      // 5. WEST ELEVATION (Rear Wall: X = -18.5 to +18.5 at Z = -25.0)
+      // CORRECTED 1.3: rear exit door aligned on the same straight walk axis as the
+      // front entrance door (both sit on the central circulation axis of the house)
+      buildSegmentedWall('x', -24.625, -18.5, 18.5, Y_PLINTH, Y_CEIL, WT, 'ext_main', [
+        { pos: -11.25, width: 4.5, bottom: 5.5, top: 9.8, type: 'window' },            // Bedroom 3 Rear Window
+        { pos: -0.55, width: 3.0, bottom: Y_PLINTH, top: 9.5, type: 'door', swing: 1 }, // Rear Exit Door (on axis with front door)
+        { pos: 2.9, width: 1.8, bottom: 8.2, top: 9.8, type: 'vent' },        // Common Washroom Toilet Ventilator
+        { pos: 11.0, width: 2.2, bottom: 8.2, top: 9.8, type: 'vent' }        // Master Toilet Rear Ventilator
+      ]);
+
+      // -------------------------------------------------------------------------
+      // C. INTERIOR PARTITION WALLS & EXACT ROOM SCHEDULE (37' × 50' BLUEPRINT)
+      // Corrected per actual floor plan: Kitchen 18'x12' (X -18.5..0.6, Z 12..25)
+      // with Pooja Ghar (5'x3') in the front-north corner; Bedroom 2 (14'x11') with
+      // attached toilet (10'6"x5') and a connecting vestibule; central passage with
+      // a fully OPEN hall-to-passage connection (no partition - correction 1.6);
+      // common washroom split into 3 sections (toilet / central washbasin / shower).
+      // -------------------------------------------------------------------------
+      // 1. KITCHEN (18' x 12') - rear wall at Z = 12.5 with WEST-side entrance door
+      // that opens into the hall (living room) - correction 1.4
+      buildSegmentedWall('x', 12.5, -18.5, 0.6, Y_PLINTH, Y_CEIL, IT, 'int_kitchen', [
+        { pos: -1.5, width: 2.0, bottom: Y_PLINTH, top: 9.5, type: 'door', swing: 1 } // Kitchen entrance door (west side, from hall)
+      ]);
+
+      // 2. PUJA GHAR (5' x 3') in the kitchen's front-north corner (X = -4.8..0.6, Z = 21.2..24.6)
+      buildSegmentedWall('x', 21.2, -4.8, 0.6, Y_PLINTH, Y_CEIL, 0.35, 'int_kitchen', []);
+      buildSegmentedWall('z', -4.8, 21.2, 24.6, Y_PLINTH, Y_CEIL, 0.35, 'int_kitchen', [
+        { pos: 22.9, width: 2.4, bottom: Y_PLINTH, top: 9.0, type: 'open' } // Puja opening from kitchen
+      ]);
+
+      // 3. LIVING ROOM (21' x 16'6") rear boundary at Z = -5.5.
+      // CORRECTION 1.6: the area between the hall and the central passage is kept
+      // completely OPEN (8'6" clear gap, X = -3.05..+5.7) - no partition modelled.
+      // Only the stair-court wall (left) and the master bedroom front wall (right) exist.
+      buildSegmentedWall('x', -5.5, -18.0, -3.05, Y_PLINTH, Y_CEIL, IT, 'int_living', []);
+      buildSegmentedWall('x', -5.5, 5.7, 18.0, Y_PLINTH, Y_CEIL, IT, 'int_master', []);
+
+      // 4. BEDROOM 2 (14' x 11', Z = 0.5..12.5) + ATTACHED TOILET (10'6" x 5') + VESTIBULE
+      // Bedroom 2 east wall (along the living room - NO door here per correction 1.5:
+      // the bedroom must not open directly into the hall)
+      buildSegmentedWall('z', -3.3, 0.75, 12.1, Y_PLINTH, Y_CEIL, IT, 'int_bed23', []);
+      // Vestibule east wall with a cased opening from the living-room side
+      // (the connecting circulation area through which Bedroom 2 is accessed)
+      buildSegmentedWall('z', -3.3, -5.25, 0.25, Y_PLINTH, Y_CEIL, IT, 'int_living', [
+        { pos: -1.25, width: 3.0, bottom: Y_PLINTH, top: 9.8, type: 'open' } // Opening from hall into vestibule
+      ]);
+      // Wall between Bedroom 2 and its attached toilet at Z = 0.5 with the bedroom
+      // entrance door positioned directly opposite the washroom entrance (correction 1.5)
+      buildSegmentedWall('x', 0.5, -18.0, -3.05, Y_PLINTH, Y_CEIL, IT, 'int_bed23', [
+        { pos: -5.15, width: 2.5, bottom: Y_PLINTH, top: 9.5, type: 'door', swing: 1 } // Bedroom 2 entrance (from vestibule)
+      ]);
+      // Attached washroom (toilet) east wall at X = -7.4 - its entrance door faces the
+      // Bedroom 2 entrance across the shared vestibule (correction 1.5: directly opposite)
+      buildSegmentedWall('z', -7.4, -5.25, 0.25, Y_PLINTH, Y_CEIL, IT, 'int_bed23', [
+        { pos: -1.75, width: 2.5, bottom: Y_PLINTH, top: 9.5, type: 'door', swing: -1 } // Attached washroom entrance (from vestibule)
+      ]);
+
+      // 5. Internal Staircase (X = -18.0 to -7.0, Z = -13.0 to -7.0)
+      // Wall between Staircase court and Bedroom 3 at Z = -13.0
+      buildSegmentedWall('x', -13.0, -18.0, -3.05, Y_PLINTH, Y_CEIL, IT, 'int_bed23', []);
+      // Dog-legged Staircase Flights leading up to Rooftop Mumty
+      const numSteps = 10;
+      for (let i = 0; i < numSteps; i++) {
+        // Flight 1 (going West toward mid-landing)
+        addBox(-8.0 - i * 0.8, -7.2 - i * 0.8, Y_PLINTH + i * 0.52, Y_PLINTH + (i + 1) * 0.52, -9.8, -7.2, 'granite_steps');
+        // Flight 2 (returning East up to roof slab)
+        addBox(-15.2 + i * 0.8, -14.4 + i * 0.8, Y_PLINTH + 5.2 + i * 0.55, Y_PLINTH + 5.2 + (i + 1) * 0.55, -12.8, -10.0, 'granite_steps');
+      }
+      // Mid-Landing Slab
+      addBox(-18.5, -15.2, Y_PLINTH + 4.8, Y_PLINTH + 5.3, -12.8, -7.2, 'granite_steps');
+
+      // 6. BEDROOM 3 (14' x 12': X = -18.0 to -3.3, Z = -25.0 to -13.0)
+      // East wall along the 4' rear passage with its entrance door
+      buildSegmentedWall('z', -3.3, -24.6, -12.75, Y_PLINTH, Y_CEIL, IT, 'int_bed23', [
+        { pos: -21.5, width: 3.0, bottom: Y_PLINTH, top: 9.5, type: 'door', swing: -1 } // Bedroom 3 door (from rear passage)
+      ]);
+
+      // 7. COMMON WASHROOM - three functional sections in one block (X = 0.7..5.45, Z = -24.6..-13.75):
+      //    toilet section (rear) | central washbasin section | shower section (front) - correction 1.7
+      // West wall facing the rear passage with a door for the toilet section + a door
+      // for the washbasin section (the shower is reached internally from the washbasin)
+      buildSegmentedWall('z', 0.7, -24.6, -13.5, Y_PLINTH, Y_CEIL, IT, 'int_living', [
+        { pos: -22.25, width: 2.5, bottom: Y_PLINTH, top: 9.0, type: 'door', swing: 1 }, // Toilet section door (from passage)
+        { pos: -18.5, width: 2.5, bottom: Y_PLINTH, top: 9.0, type: 'door', swing: 1 }   // Washbasin section door (from passage)
+      ]);
+      // Front wall of the washroom block (its passage-side face carries the washing
+      // machine niche - outside the washroom, correction 1.7)
+      buildSegmentedWall('x', -13.75, 0.7, 5.45, Y_PLINTH, Y_CEIL, IT, 'int_living', []);
+      // Partition between toilet section and central washbasin section
+      buildSegmentedWall('x', -20.5, 0.95, 5.2, Y_PLINTH, Y_CEIL, IT, 'int_living', []);
+      // Partial partition between washbasin and shower sections (open walk-in gap on the east side)
+      buildSegmentedWall('x', -16.75, 0.95, 3.2, Y_PLINTH, Y_CEIL, IT, 'int_living', []);
+
+      // 8. MASTER BEDROOM (12' x 14'6": X = 5.7..18.0, Z = -20.5..-5.5) & ATTACHED TOILET (12' x 4')
+      // Shared west/east wall of master + washroom block, with the master entrance door
+      // opening from the 8'6" central passage
+      buildSegmentedWall('z', 5.45, -24.6, -5.5, Y_PLINTH, Y_CEIL, IT, 'int_master', [
+        { pos: -8.0, width: 3.0, bottom: Y_PLINTH, top: 9.5, type: 'door', swing: 1 } // Master Bedroom entrance (from passage)
+      ]);
+      // Master Attached Toilet Partition at Z = -20.5 with toilet door
+      buildSegmentedWall('x', -20.5, 5.7, 18.0, Y_PLINTH, Y_CEIL, IT, 'int_master', [
+        { pos: 7.55, width: 2.5, bottom: Y_PLINTH, top: 9.0, type: 'door', swing: -1 } // Master toilet door
+      ]);
+
+      // Subtle Interior Reference Furniture (Beds, Living Sofa, Sanitary Fixtures for Dollhouse clarity)
+      buildInteriorFurniture(Y_PLINTH);
+
+      // -------------------------------------------------------------------------
+      // D. ROOF SLAB, SUNKEN PORCH ROOF, PARAPET CUTOUTS & STAIRCASE MUMTY
+      // (Placed in `roofGroup` so Dollhouse Cutaway mode cleanly toggles it!)
+      // -------------------------------------------------------------------------
+      // 1. Main House Roof Slab (Y = 13.0 to 13.6) with staircase cutout opening
+      addBox(-18.9, -4.0, Y_CEIL, Y_SLAB, -25.4, -13.0, 'slab_trim', roofGroup);
+      addBox(-18.9, -4.0, Y_CEIL, Y_SLAB, -7.0, 25.4, 'slab_trim', roofGroup);
+      addBox(-4.0, 18.9, Y_CEIL, Y_SLAB, -25.4, 12.5, 'slab_trim', roofGroup);
+
+      // 2. SUNKEN FRONT PORCH ROOF (correction 1.1): the porch roof slab sits at a
+      // LOWER elevation (Y = 11.75 to 12.35) than the main house roof slab (Y = 13.0 to
+      // 13.6), creating the sunken/recessed appearance; the fascia beams and wall
+      // detailing rise back up to align with the main house slab level (Photo 6 & 7)
+      addBox(0.2, 19.3, 11.75, 12.35, 12.5, 25.8, 'slab_trim', roofGroup);
+      // Porch ceiling: fluted wooden louver finish in a SLIGHTLY LIGHTER shade of the
+      // same wood colour family, complementing the dark tiled walls (Section 3)
+      addBox(0.6, 17.8, 11.62, 11.75, 12.9, 24.6, porchCeilWoodMat, roofGroup, false);
+      // Decorative beam band spanning the porch front at MAIN slab level (aligns with house)
+      addBox(0.2, 18.8, 12.35, 13.6, 24.4, 25.3, 'ext_main', roofGroup);
+      addBox(17.8, 18.8, 12.35, 13.6, 12.5, 25.3, 'ext_main', roofGroup);
+      // Beam return along the porch-left wall top, also aligned to the main slab level
+      addBox(0.2, 1.0, 12.35, 13.6, 12.5, 24.4, 'ext_main', roofGroup);
+
+      // 3. Front Porch Geometric Parapet Cutouts (Exact Match to Site Photo 7!)
+      // Left Lower Square Hollow Cutout Frame (X = +0.2 to +4.4, Y = 13.6 to 16.5)
+      addBox(0.2, 0.9, 13.6, 16.5, 24.4, 25.2, 'box_grooves', roofGroup);
+      addBox(3.7, 4.4, 13.6, 16.5, 24.4, 25.2, 'box_grooves', roofGroup);
+      addBox(0.2, 4.4, 15.8, 16.5, 24.4, 25.2, 'box_grooves', roofGroup);
+
+      // Central Tall Rectangular Hollow Cutout Frame (Camel Skin 8515 Accent: X = +4.4 to +11.4, Y = 13.6 to 18.2)
+      addBox(4.4, 5.4, 13.6, 18.2, 24.3, 25.4, 'parapet_box', roofGroup);
+      addBox(10.4, 11.4, 13.6, 18.2, 24.3, 25.4, 'parapet_box', roofGroup);
+      addBox(4.4, 11.4, 17.3, 18.2, 24.3, 25.4, 'parapet_box', roofGroup);
+      addBox(5.4, 10.4, 13.6, 14.6, 24.4, 25.2, 'parapet_box', roofGroup);
+
+      // Right Solid Parapet Wall with Dark Coping (X = +11.4 to +18.6, Y = 13.6 to 16.2)
+      addBox(11.4, 18.6, 13.6, 16.0, 24.4, 25.2, 'ext_main', roofGroup);
+      addBox(11.4, 18.7, 16.0, 16.3, 24.3, 25.3, 'pillar_plinth', roofGroup);
+      // South-East Porch Return Parapet (Photo 6 & 8)
+      addBox(17.8, 18.6, 13.6, 16.2, 12.5, 24.4, 'pillar_plinth', roofGroup);
+
+      // Perimeter Parapet Walls around Main Roof (3' height)
+      addBox(-18.6, 0.2, 13.6, 16.5, 24.4, 25.1, 'ext_main', roofGroup); // Kitchen front parapet
+      addBox(17.8, 18.6, 13.6, 16.3, -25.0, 12.5, 'ext_main', roofGroup); // South parapet
+      addBox(-18.6, 18.6, 13.6, 16.3, -25.1, -24.4, 'ext_main', roofGroup); // West rear parapet
+      addBox(-18.6, -17.8, 13.6, 16.3, -25.0, 25.0, 'ext_main', roofGroup); // North parapet
+
+      // 4. Rooftop Staircase Mumty Tower (Above Staircase: X = -18.6 to -6.5, Z = -13.5 to -6.5, Y = 13.5 to 22.0)
+      // Matches Photo 1 & 8: Sloping/cantilevered chajja slab, vertical window slit with wooden louvers, terrace door
+      addBox(-18.6, -6.5, 13.5, 21.8, -13.5, -12.8, 'box_grooves', roofGroup); // Mumty North-West wall
+      addBox(-18.6, -6.5, 13.5, 21.8, -7.2, -6.5, 'box_grooves', roofGroup);   // Mumty North-East wall
+      // Mumty Outer Wall (X = -18.6) with tall vertical window slot
+      addBox(-18.6, -17.8, 13.5, 21.8, -13.5, -11.2, 'box_grooves', roofGroup);
+      addBox(-18.6, -17.8, 13.5, 21.8, -8.8, -6.5, 'box_grooves', roofGroup);
+      addBox(-18.6, -17.8, 13.5, 15.2, -11.2, -8.8, 'box_grooves', roofGroup);
+      addBox(-18.6, -17.8, 20.5, 21.8, -11.2, -8.8, 'box_grooves', roofGroup);
+      addBox(-18.3, -18.1, 15.2, 20.5, -11.2, -8.8, 'porch_wood', roofGroup); // Vertical louver screen (Photo 8)
+      // Mumty Inner Wall (X = -6.5) with Terrace Exit Door
+      addBox(-7.2, -6.5, 13.5, 21.8, -13.5, -10.5, 'ext_main', roofGroup);
+      addBox(-7.2, -6.5, 19.8, 21.8, -10.5, -7.2, 'ext_main', roofGroup);
+      // Mumty Overhanging Roof Slab
+      addBox(-20.2, -5.2, 21.8, 22.4, -14.5, -5.5, 'pillar_plinth', roofGroup);
+
+      // -------------------------------------------------------------------------
+      // E. SURROUNDING LAWN & PAVER DRIVEWAY (realistic ground context)
+      // -------------------------------------------------------------------------
+      const lawnMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, map: createGrassTexture() });
+      const paverMat = new THREE.MeshStandardMaterial({ color: 0x6b6f75, roughness: 0.72 });
+      addBox(-55, 55, -0.4, 0, -55, 55, lawnMat, groundGroup, false);
+      addBox(-22, 23, -0.35, 0.02, -28, 36, paverMat, groundGroup, false);
+      groundGroup.visible = true; // Realistic daylight context ON by default (toggleable)
+    }
+
+    // ============================================================================
+    // 7B. REALISTIC INTERIOR FURNISHING, APPLIANCES, POP CEILINGS, FANS & PLANTS
+    // ============================================================================
+    const rotatingFans = [];   // animated ceiling fans
+    const coveLights = [];     // warm interior point lights (POP coves, lamps, pendants)
+
+    function addProp(x1, x2, y1, y2, z1, z2, mat, parent = houseGroup, edges = false) {
+      return addBox(x1, x2, y1, y2, z1, z2, mat, parent, edges);
+    }
+
+    function makeCeilingFan(x, y, z, bladeLen) {
+      const g = new THREE.Group();
+      // Downrod (runs up from the motor to the ceiling)
+      const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.9, 10), applianceSteelMat);
+      rod.position.y = 0.45; g.add(rod);
+      // Motor housing
+      const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.34, 0.42, 18), applianceSteelMat);
+      motor.position.y = -0.06; motor.castShadow = true; g.add(motor);
+      // 3 aerodynamic blades radiating from the hub
+      for (let i = 0; i < 3; i++) {
+        const th = (i * Math.PI * 2) / 3;
+        const blade = new THREE.Mesh(new THREE.BoxGeometry(bladeLen, 0.05, 0.55), fanBladeMat);
+        blade.rotation.y = -th;
+        blade.rotation.z = 0.1;
+        blade.position.set(Math.cos(th) * bladeLen * 0.45, -0.28, Math.sin(th) * bladeLen * 0.45);
+        blade.castShadow = true;
+        g.add(blade);
+      }
+      g.position.set(x, y, z);
+      houseGroup.add(g);
+      rotatingFans.push(g);
+      return g;
+    }
+
+    function makePlant(x, z, height, bush) {
+      const g = new THREE.Group();
+      if (bush) {
+        const mats = [leafMatA, leafMatB, leafMatC];
+        for (let i = 0; i < 5; i++) {
+          const r = 0.55 + Math.random() * 0.5;
+          const s = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 7), mats[i % 3]);
+          s.position.set((Math.random() - 0.5) * 1.1, height * (0.45 + Math.random() * 0.45), (Math.random() - 0.5) * 1.1);
+          s.scale.y = 0.75; s.castShadow = true;
+          g.add(s);
+        }
+      } else {
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.2, height * 0.62, 8), trunkMat);
+        trunk.position.y = height * 0.31; trunk.castShadow = true;
+        g.add(trunk);
+        for (let i = 0; i < 6; i++) {
+          const frond = new THREE.Mesh(new THREE.ConeGeometry(0.16, height * 0.55, 6), i % 2 ? leafMatA : leafMatB);
+          frond.position.set((Math.random() - 0.5) * 0.9, height * (0.68 + Math.random() * 0.28), (Math.random() - 0.5) * 0.9);
+          frond.rotation.set((Math.random() - 0.5) * 0.9, Math.random() * Math.PI, (Math.random() - 0.5) * 0.9);
+          frond.castShadow = true;
+          g.add(frond);
+        }
+      }
+      g.position.set(x, 0, z);
+      groundGroup.add(g);
+      return g;
+    }
+
+    function makePottedPlant(x, y, z, potH, plantH) {
+      const g = new THREE.Group();
+      const pot = new THREE.Mesh(new THREE.CylinderGeometry(potH * 0.55, potH * 0.42, potH, 12), terracottaMat);
+      pot.position.y = potH / 2; pot.castShadow = true; g.add(pot);
+      const soil = new THREE.Mesh(new THREE.CylinderGeometry(potH * 0.52, potH * 0.52, 0.06, 12), plantSoilMat);
+      soil.position.y = potH; g.add(soil);
+      for (let i = 0; i < 7; i++) {
+        const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.09, plantH * (0.5 + Math.random() * 0.5), 5), i % 2 ? leafMatB : leafMatA);
+        leaf.position.set((Math.random() - 0.5) * 0.5, potH + plantH * 0.45, (Math.random() - 0.5) * 0.5);
+        leaf.rotation.set((Math.random() - 0.5) * 0.7, Math.random() * Math.PI, (Math.random() - 0.5) * 0.7);
+        leaf.castShadow = true;
+        g.add(leaf);
+      }
+      g.position.set(x, y, z);
+      return g;
+    }
+
+    function makeWC(x, z, facing, yF) {
+      // Ceramic WC pan with cistern (facing: 'x+' | 'x-' | 'z+' | 'z-')
+      const g = new THREE.Group();
+      const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.5, 1.05, 16), fixtureMat);
+      bowl.position.y = yF + 0.55; bowl.castShadow = true; g.add(bowl);
+      const seat = new THREE.Mesh(new THREE.CylinderGeometry(0.66, 0.66, 0.14, 16), fixtureMat);
+      seat.position.y = yF + 1.12; g.add(seat);
+      const cistern = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.35, 0.55), fixtureMat);
+      cistern.position.y = yF + 1.75; cistern.castShadow = true; g.add(cistern);
+      if (facing === 'x+') g.rotation.y = Math.PI / 2;
+      if (facing === 'x-') g.rotation.y = -Math.PI / 2;
+      if (facing === 'z-') g.rotation.y = Math.PI;
+      g.position.set(x, 0, z);
+      houseGroup.add(g);
+      return g;
+    }
+
+    function makeBasin(x, z, w, d, yBase, mirrorWall) {
+      // Counter + washbasin + mirror on the given wall ('x+' wall on +X side etc.)
+      addProp(x - w / 2, x + w / 2, yBase, yBase + 2.4, z - d / 2, z + d / 2, walnutMat);
+      addProp(x - w / 2 + 0.2, x + w / 2 - 0.2, yBase + 2.4, yBase + 2.5, z - d / 2 + 0.2, z + d / 2 - 0.2, marbleMat);
+      const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.5, 0.55, 14), fixtureMat);
+      bowl.position.set(x, yBase + 2.75, z);
+      bowl.castShadow = true; houseGroup.add(bowl);
+      const faucet = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.0, 8), chromeMat);
+      faucet.position.set(x, yBase + 3.0, z);
+      houseGroup.add(faucet);
+      if (mirrorWall === 'x+') addProp(x + w / 2 - 0.12, x + w / 2 - 0.02, yBase + 3.1, yBase + 5.6, z - d / 2 + 0.1, z + d / 2 - 0.1, mirrorMat);
+      if (mirrorWall === 'x-') addProp(x - w / 2 + 0.02, x - w / 2 + 0.12, yBase + 3.1, yBase + 5.6, z - d / 2 + 0.1, z + d / 2 - 0.1, mirrorMat);
+      if (mirrorWall === 'z+') addProp(x - w / 2 + 0.1, x + w / 2 - 0.1, yBase + 3.1, yBase + 5.6, z + d / 2 - 0.12, z + d / 2 - 0.02, mirrorMat);
+      if (mirrorWall === 'z-') addProp(x - w / 2 + 0.1, x + w / 2 - 0.1, yBase + 3.1, yBase + 5.6, z - d / 2 + 0.02, z - d / 2 + 0.12, mirrorMat);
+    }
+
+    function makeShower(x, z, wallSide, headY) {
+      // Shower head + arm on wallSide ('x+','x-','z+','z-') + floor drain
+      const armLen = 0.85;
+      let ax = x, az = z;
+      if (wallSide === 'x+') { ax = x - armLen / 2; }
+      if (wallSide === 'x-') { ax = x + armLen / 2; }
+      if (wallSide === 'z+') { az = z - armLen / 2; }
+      if (wallSide === 'z-') { az = z + armLen / 2; }
+      const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, armLen, 8), chromeMat);
+      arm.rotation.z = Math.PI / 2;
+      if (wallSide === 'z+' || wallSide === 'z-') arm.rotation.y = Math.PI / 2;
+      arm.position.set(ax, headY, az);
+      houseGroup.add(arm);
+      const head = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.3, 0.18, 14), chromeMat);
+      head.position.set(wallSide === 'x+' ? x - armLen : wallSide === 'x-' ? x + armLen : x, headY - 0.15,
+        wallSide === 'z+' ? z - armLen : wallSide === 'z-' ? z + armLen : z);
+      houseGroup.add(head);
+      const drain = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.05, 10), chromeMat);
+      drain.position.set(x, headY - 6.3, z);
+      houseGroup.add(drain);
+    }
+
+    function makeBed(x1, x2, zHead, zFoot, yF) {
+      // Bed with headboard at zHead, foot at zFoot (either direction), floor at yF
+      const sgn = Math.sign(zFoot - zHead) || 1;
+      const zMin = Math.min(zHead, zFoot);
+      const zMax = Math.max(zHead, zFoot);
+      addProp(x1, x2, yF + 0.15, yF + 1.15, zMin + 0.05, zMax - 0.05, furnitureWoodMat);          // frame
+      addProp(x1 + 0.1, x2 - 0.1, yF + 1.15, yF + 1.9, zMin + 0.15, zMax - 0.15, mattressMat);    // mattress
+      // Duvet over the foot-side 60%
+      const dzA = zHead + (zFoot - zHead) * 0.38;
+      const dzB = zFoot - 0.12 * sgn;
+      addProp(x1 + 0.06, x2 - 0.06, yF + 1.85, yF + 2.15, Math.min(dzA, dzB), Math.max(dzA, dzB), duvetMat);
+      // Headboard against the head wall
+      addProp(x1 - 0.12, x2 + 0.12, yF + 0.15, yF + 3.2, zHead - 0.15 * sgn, zHead + 0.18 * sgn, furnitureWoodMat);
+      // Two pillows next to the headboard
+      const pzA = zHead + 0.22 * sgn;
+      const pzB = zHead + 1.05 * sgn;
+      addProp(x1 + 0.1, x1 + (x2 - x1) * 0.46, yF + 1.9, yF + 2.45, Math.min(pzA, pzB), Math.max(pzA, pzB), mattressMat);
+      addProp(x1 + (x2 - x1) * 0.54, x2 - 0.1, yF + 1.9, yF + 2.45, Math.min(pzA, pzB), Math.max(pzA, pzB), mattressMat);
+    }
+
+    function makeWardrobe(x1, x2, z1, z2, yF) {
+      addProp(x1, x2, yF + 0.15, yF + 6.9, z1, z2, walnutMat);
+      // Louvre-style door lines
+      const n = Math.max(2, Math.floor((x2 - x1) / 1.6));
+      for (let i = 1; i < n; i++) {
+        const lx = x1 + ((x2 - x1) * i) / n;
+        addProp(lx - 0.03, lx + 0.03, yF + 0.35, yF + 6.7, z1 + (z2 - z1) * 0.06, z1 + (z2 - z1) * 0.94, furnitureWoodMat);
+      }
+      addProp(x1 + 0.15, x2 - 0.15, yF + 6.9, yF + 7.05, z1 + 0.1, z2 - 0.1, furnitureWoodMat); // top trim
+    }
+
+    function makeSpotlight(x, y, z) {
+      const g = new THREE.Group();
+      const trim = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.1, 12), chromeMat);
+      g.add(trim);
+      const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.06, 12), coveLightMat);
+      lens.position.y = -0.06; g.add(lens);
+      g.position.set(x, y, z);
+      houseGroup.add(g);
+      return g;
+    }
+
+    function buildInteriorFurniture(yFloor) {
+      // ------------------------- LIVING ROOM (21' x 16'6") -------------------------
+      // Area rug defining the seating zone
+      addProp(6.2, 13.8, yFloor + 0.02, yFloor + 0.09, 2.2, 8.9, fabricAccentMat);
+      // 3-seater sofa facing the TV wall (rear boundary wall)
+      addProp(7.4, 12.6, yFloor, yFloor + 1.0, 6.6, 8.9, fabricGreyMat);       // seat base
+      addProp(7.4, 12.6, yFloor + 1.0, yFloor + 2.3, 8.35, 8.9, fabricGreyMat); // backrest
+      addProp(7.4, 7.9, yFloor + 1.0, yFloor + 1.85, 5.9, 8.9, fabricGreyMat);  // left arm
+      addProp(12.1, 12.6, yFloor + 1.0, yFloor + 1.85, 5.9, 8.9, fabricGreyMat);// right arm
+      for (let i = 0; i < 3; i++) addProp(7.8 + i * 1.5, 9.1 + i * 1.5, yFloor + 1.0, yFloor + 1.15, 6.7, 8.3, fabricBeigeMat); // seat cushions
+      // Two lounge chairs
+      addProp(5.4, 7.2, yFloor, yFloor + 1.0, 2.6, 4.9, fabricBeigeMat);
+      addProp(5.4, 7.2, yFloor + 1.0, yFloor + 2.2, 2.6, 3.15, fabricBeigeMat);
+      addProp(12.8, 14.6, yFloor, yFloor + 1.0, 2.6, 4.9, fabricBeigeMat);
+      addProp(12.8, 14.6, yFloor + 1.0, yFloor + 2.2, 2.6, 3.15, fabricBeigeMat);
+      // Wooden coffee table with lower shelf
+      addProp(8.5, 11.5, yFloor, yFloor + 1.35, 3.7, 5.5, furnitureWoodMat);
+      addProp(8.8, 11.2, yFloor + 0.35, yFloor + 0.45, 3.95, 5.25, furnitureWoodMat);
+      // TV console + wall-mounted TV on the master bedroom front wall
+      addProp(8.2, 13.8, yFloor, yFloor + 1.7, -5.15, -4.45, walnutMat);
+      addProp(9.4, 12.6, yFloor + 3.2, yFloor + 5.9, -5.05, -4.95, tvMat);
+      // Dining nook on the western side (clear of the front-door walk axis)
+      addProp(-2.7, 1.9, yFloor, yFloor + 2.5, 4.35, 6.85, walnutMat);          // table top support
+      addProp(-2.85, 2.05, yFloor + 2.5, yFloor + 2.62, 4.2, 7.0, furnitureWoodMat); // table top
+      for (let i = 0; i < 2; i++) { // chairs along both long sides
+        addProp(-2.3 + i * 3.4, -1.4 + i * 3.4, yFloor, yFloor + 1.45, 3.0, 4.15, furnitureWoodMat);
+        addProp(-2.3 + i * 3.4, -1.4 + i * 3.4, yFloor + 1.45, yFloor + 2.55, 3.0, 3.3, furnitureWoodMat);
+        addProp(-2.3 + i * 3.4, -1.4 + i * 3.4, yFloor, yFloor + 1.45, 7.05, 8.2, furnitureWoodMat);
+        addProp(-2.3 + i * 3.4, -1.4 + i * 3.4, yFloor + 1.45, yFloor + 2.55, 7.85, 8.2, furnitureWoodMat);
+      }
+      // Console table along the eastern wall + table lamp
+      addProp(16.7, 17.5, yFloor, yFloor + 2.5, 5.0, 9.5, walnutMat);
+      addProp(17.0, 17.4, yFloor + 2.5, yFloor + 3.1, 6.4, 7.2, fixtureMat);
+      addProp(17.05, 17.35, yFloor + 3.1, yFloor + 3.7, 6.5, 7.1, coveLightMat);
+      const lampLight = new THREE.PointLight(0xffd9a0, 0.5, 12);
+      lampLight.position.set(17.2, yFloor + 3.8, 6.8);
+      houseGroup.add(lampLight);
+      coveLights.push(lampLight);
+      // Potted plant in the far corner
+      const lp = makePottedPlant(16.6, yFloor + 0.1, 10.9, 1.4, 2.6);
+      houseGroup.add(lp);
+
+      // ------------------------------ KITCHEN (18' x 12') ------------------------------
+      // L-shaped platform: run along the south wall + run along the east (front) wall,
+      // stopping at the pooja ghar (cooking platform on the east-facing side - corr. 1.4)
+      addProp(-18.0, -16.1, yFloor, yFloor + 2.7, 13.3, 24.3, cabinetMat);      // south run base
+      addProp(-16.1, -4.9, yFloor, yFloor + 2.7, 22.5, 24.3, cabinetMat);       // east run base
+      addProp(-18.0, -16.1, yFloor + 2.7, yFloor + 2.85, 13.3, 24.3, counterGraniteMat); // granite tops
+      addProp(-16.1, -4.9, yFloor + 2.7, yFloor + 2.85, 22.5, 24.3, counterGraniteMat);
+      // Tiled backsplash behind both runs
+      addProp(-18.0, -16.2, yFloor + 2.85, yFloor + 4.6, 24.3, 24.55, cabinetMat);
+      addProp(-16.1, -4.9, yFloor + 2.85, yFloor + 4.6, 24.3, 24.55, cabinetMat);
+      // Cabinet door grooves on the base units
+      for (let gx = -17.8; gx < -16.3; gx += 1.0) addProp(gx, gx + 0.06, yFloor + 0.2, yFloor + 2.5, 13.35, 13.55, applianceSteelMat);
+      for (let gx = -15.8; gx < -5.2; gx += 1.0) addProp(gx, gx + 0.06, yFloor + 0.2, yFloor + 2.5, 22.55, 22.75, applianceSteelMat);
+      // Sink under the front side window (stainless double bowl + faucet)
+      addProp(-17.95, -16.2, yFloor + 2.7, yFloor + 2.78, 20.7, 22.4, applianceSteelMat);
+      addProp(-17.9, -16.25, yFloor + 2.62, yFloor + 2.7, 20.75, 22.35, applianceSteelMat);
+      const sinkFaucet = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.1, 8), chromeMat);
+      sinkFaucet.position.set(-17.05, yFloor + 3.4, 21.55);
+      houseGroup.add(sinkFaucet);
+      const sinkSpout = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.55, 8), chromeMat);
+      sinkSpout.rotation.z = Math.PI / 2;
+      sinkSpout.position.set(-16.85, yFloor + 3.9, 21.55);
+      houseGroup.add(sinkSpout);
+      // 4-burner hob on the east run + chimney hood above
+      addProp(-12.4, -10.4, yFloor + 2.85, yFloor + 2.95, 23.0, 23.9, hobBlackMat);
+      [[-12.0, 23.3], [-11.1, 23.3], [-12.0, 23.7], [-11.1, 23.7]].forEach(([bx, bz]) => {
+        const burner = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.25, 0.09, 12), grilleMat);
+        burner.position.set(bx, yFloor + 3.0, bz);
+        houseGroup.add(burner);
+      });
+      addProp(-13.0, -9.8, yFloor + 6.6, yFloor + 7.15, 22.9, 24.2, applianceSteelMat); // chimney hood
+      addProp(-12.3, -10.5, yFloor + 7.15, yFloor + 12.95, 23.3, 24.0, applianceSteelMat); // flue duct
+      // Upper wall cabinets (above counter, clear of windows)
+      addProp(-16.1, -5.1, yFloor + 5.6, yFloor + 7.6, 24.3, 24.6, cabinetMat);
+      addProp(-18.0, -16.2, yFloor + 5.6, yFloor + 7.6, 18.4, 20.3, cabinetMat);
+      // Refrigerator near the kitchen entrance (west side)
+      addProp(-3.7, -1.5, yFloor, yFloor + 5.6, 12.95, 15.15, applianceSteelMat);
+      addProp(-3.68, -1.52, yFloor + 3.6, yFloor + 5.6, 12.9, 15.2, applianceDarkMat);
+      addProp(-1.62, -1.54, yFloor + 0.9, yFloor + 3.3, 12.85, 13.15, chromeMat); // door handle
+      // Compact breakfast table + 2 stools in the kitchen's open centre-west
+      addProp(-7.6, -5.3, yFloor, yFloor + 2.45, 14.6, 16.9, walnutMat);
+      addProp(-7.75, -5.15, yFloor + 2.45, yFloor + 2.58, 14.45, 17.05, furnitureWoodMat);
+      [[-8.6, 15.2], [-4.3, 16.3]].forEach(([sx, sz]) => {
+        const stool = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.45, 1.6, 12), furnitureWoodMat);
+        stool.position.set(sx, yFloor + 0.8, sz);
+        stool.castShadow = true;
+        houseGroup.add(stool);
+      });
+
+      // ------------------------------ PUJA GHAR (5' x 3') ------------------------------
+      // Marble worship platform along the front wall + backrest panel + brass accents
+      addProp(-4.4, -0.1, yFloor, yFloor + 1.5, 22.8, 24.35, marbleMat);
+      addProp(-4.4, -0.15, yFloor + 1.5, yFloor + 5.8, 24.35, 24.55, walnutMat);
+      // Simplified deity silhouettes + diya lamps
+      const deity1 = new THREE.Mesh(new THREE.SphereGeometry(0.42, 12, 10), marbleMat);
+      deity1.position.set(-3.2, yFloor + 2.15, 23.5); deity1.castShadow = true; houseGroup.add(deity1);
+      const deity2 = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.15, 10), marbleMat);
+      deity2.position.set(-1.7, yFloor + 2.3, 23.5); deity2.castShadow = true; houseGroup.add(deity2);
+      addProp(-4.0, -3.7, yFloor + 1.5, yFloor + 1.7, 22.9, 23.2, coveLightMat);
+      addProp(-1.6, -1.3, yFloor + 1.5, yFloor + 1.7, 22.9, 23.2, coveLightMat);
+      const pujaLight = new THREE.PointLight(0xffd9a0, 0.55, 10);
+      pujaLight.position.set(-2.2, yFloor + 3.4, 23.4);
+      houseGroup.add(pujaLight);
+      coveLights.push(pujaLight);
+      // Jali (lattice) screen across the puja opening facing the kitchen
+      for (let jy = yFloor + 0.3; jy < yFloor + 8.6; jy += 0.55) {
+        addProp(-4.82, -4.78, jy, jy + 0.3, 21.8, 24.0, furnitureWoodMat, houseGroup, false);
+      }
+
+      // ------------------------------ BEDROOMS ------------------------------
+      // Master Bedroom (12' x 14'6"): king bed with headboard against the toilet wall
+      makeBed(9.5, 15.5, -19.9, -13.4, yFloor);
+      addProp(8.6, 9.35, yFloor, yFloor + 1.9, -19.75, -19.0, walnutMat);   // side table L
+      addProp(15.65, 16.4, yFloor, yFloor + 1.9, -19.75, -19.0, walnutMat); // side table R
+      addProp(8.85, 9.1, yFloor + 1.9, yFloor + 2.45, -19.55, -19.2, coveLightMat);
+      addProp(15.9, 16.15, yFloor + 1.9, yFloor + 2.45, -19.55, -19.2, coveLightMat);
+      const bedside1 = new THREE.PointLight(0xffd9a0, 0.4, 9);
+      bedside1.position.set(9.0, yFloor + 2.7, -19.4); houseGroup.add(bedside1); coveLights.push(bedside1);
+      const bedside2 = new THREE.PointLight(0xffd9a0, 0.4, 9);
+      bedside2.position.set(16.0, yFloor + 2.7, -19.4); houseGroup.add(bedside2); coveLights.push(bedside2);
+      makeWardrobe(5.85, 6.75, -19.6, -12.0, yFloor);               // wardrobe along west wall
+      addProp(8.2, 12.2, yFloor, yFloor + 1.8, -5.15, -4.55, walnutMat); // dresser on front wall
+      addProp(9.2, 11.2, yFloor + 3.0, yFloor + 5.2, -5.68, -5.58, tvMat);
+      const mp = makePottedPlant(16.9, yFloor + 0.1, -7.0, 1.3, 2.4);
+      houseGroup.add(mp);
+
+      // Bedroom 2 (14' x 11'): bed with headboard against the kitchen rear wall
+      makeBed(-14.5, -9.5, 11.9, 6.2, yFloor);
+      addProp(-15.35, -14.6, yFloor, yFloor + 1.9, 11.15, 11.9, walnutMat);
+      addProp(-9.4, -8.65, yFloor, yFloor + 1.9, 11.15, 11.9, walnutMat);
+      addProp(-15.1, -14.85, yFloor + 1.9, yFloor + 2.45, 11.35, 11.7, coveLightMat);
+      addProp(-9.15, -8.9, yFloor + 1.9, yFloor + 2.45, 11.35, 11.7, coveLightMat);
+      // Wardrobe along the rear wall (west of the entrance door swing)
+      makeWardrobe(-17.8, -12.5, 0.85, 1.75, yFloor);
+      addProp(-5.6, -3.9, yFloor, yFloor + 2.2, 10.9, 11.85, furnitureWoodMat); // study desk under window
+
+      // Bedroom 3 (14' x 12'): bed with headboard against the rear exterior wall
+      makeBed(-14.5, -9.5, -23.9, -18.4, yFloor);
+      addProp(-15.35, -14.6, yFloor, yFloor + 1.9, -23.75, -23.0, walnutMat);
+      addProp(-9.4, -8.65, yFloor, yFloor + 1.9, -23.75, -23.0, walnutMat);
+      makeWardrobe(-17.8, -12.5, -12.6, -11.7, yFloor);           // wardrobe along stair-side wall
+      const bp2 = makePottedPlant(-4.3, yFloor + 0.1, -23.6, 1.3, 2.4);
+      houseGroup.add(bp2);
+
+      // ------------------------------ BATHROOMS ------------------------------
+      // Master attached toilet (12' x 4'): WC + basin + walk-in shower at the east end
+      makeWC(8.9, -23.4, 'z-', yFloor);
+      makeBasin(12.6, -23.6, 3.4, 1.6, yFloor, 'z-');
+      makeShower(16.6, -22.4, 'x+', yFloor + 6.4);
+      addProp(14.85, 15.0, yFloor, yFloor + 6.6, -24.35, -21.0, showerGlassMat); // glass screen
+      addProp(5.85, 6.15, yFloor + 6.6, yFloor + 6.9, -24.35, -20.55, applianceSteelMat); // towel rail
+
+      // Bedroom 2 attached washroom (10'6" x 5'): WC + basin + shower
+      makeWC(-17.1, -4.6, 'x-', yFloor);
+      makeBasin(-14.6, -4.9, 3.2, 1.5, yFloor, 'z-');
+      makeShower(-9.4, -3.6, 'x+', yFloor + 6.4);
+      addProp(-11.7, -11.55, yFloor, yFloor + 6.6, -5.0, -1.6, showerGlassMat);
+
+      // Common washroom - 3 functional sections (correction 1.7):
+      // [toilet at rear] - [central washbasin] - [shower at front]
+      makeWC(4.1, -23.4, 'z-', yFloor);                                    // toilet section WC
+      makeBasin(4.0, -18.4, 2.4, 1.6, yFloor, 'x+');               // central washbasin section
+      makeShower(2.6, -15.1, 'z+', yFloor + 6.2);                  // shower section
+      addProp(0.98, 1.1, yFloor, yFloor + 6.4, -16.5, -14.4, showerGlassMat); // shower splash screen
+      // Washing machine niche OUTSIDE the washroom, along the wall adjacent to the
+      // central passage (front face of the washroom block) - correction 1.7
+      addProp(0.98, 3.25, yFloor, yFloor + 2.35, -13.42, -11.35, applianceSteelMat); // body
+      const wmDoor = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 0.1, 22), applianceDarkMat);
+      wmDoor.rotation.x = Math.PI / 2;
+      wmDoor.rotation.z = Math.PI / 2;
+      wmDoor.position.set(2.1, yFloor + 1.25, -13.35);
+      wmDoor.castShadow = true;
+      houseGroup.add(wmDoor);
+      addProp(0.98, 3.25, yFloor + 2.35, yFloor + 2.5, -13.42, -11.35, applianceDarkMat); // control strip
+      addProp(3.3, 5.4, yFloor, yFloor + 2.6, -13.42, -11.9, walnutMat);                // utility counter
+
+      // ------------------------------ CEILING FANS (2.3) ------------------------------
+      // Porch outdoor fan (hung just below the lighter wood fluted ceiling)
+      makeCeilingFan(9.0, 10.75, 18.5, 2.4);
+      // Living room fan on the central POP panel
+      makeCeilingFan(9.5, 12.15, 3.0, 2.2);
+      // Bedroom fans
+      makeCeilingFan(11.5, 12.15, -13.0, 2.2);
+      makeCeilingFan(-10.5, 12.15, 6.0, 2.2);
+      makeCeilingFan(-10.5, 12.15, -18.5, 2.2);
+
+      // ------------------------------ POP FALSE CEILINGS (2.4) ------------------------------
+      // Living room: peripheral drop border with concealed cove lighting + recessed
+      // spotlights; central panel left flush (proportional residential design)
+      const LVR = { x1: -3.05, x2: 17.75, z1: -5.75, z2: 12.1 };
+      const dropY = 12.4;
+      addProp(LVR.x1, LVR.x2, dropY, 13.0, 10.4, 12.1, popMat);          // front border strip
+      addProp(LVR.x1, LVR.x2, dropY, 13.0, -5.75, -4.05, popMat);        // rear border strip
+      addProp(LVR.x1, -1.35, dropY, 13.0, -4.05, 10.4, popMat);          // west border strip
+      addProp(15.95, LVR.x2, dropY, 13.0, -4.05, 10.4, popMat);          // east border strip
+      // Concealed cove light strips along the border inner edges
+      addProp(LVR.x1 + 0.4, LVR.x2 - 0.4, dropY + 0.02, dropY + 0.1, 10.5, 10.62, coveLightMat);
+      addProp(LVR.x1 + 0.4, LVR.x2 - 0.4, dropY + 0.02, dropY + 0.1, -4.27, -4.15, coveLightMat);
+      addProp(-1.57, -1.45, dropY + 0.02, dropY + 0.1, -3.9, 10.3, coveLightMat);
+      addProp(15.83, 15.95, dropY + 0.02, dropY + 0.1, -3.9, 10.3, coveLightMat);
+      // Recessed spotlights in the border
+      [-1.0, 3.5, 8.0, 12.5, 16.5].forEach(sx => { makeSpotlight(sx, dropY + 0.06, 11.25); makeSpotlight(sx, dropY + 0.06, -3.7); });
+      [-2.0, 2.8, 7.6].forEach(sz => { makeSpotlight(-2.4, dropY + 0.06, sz); makeSpotlight(17.0, dropY + 0.06, sz); });
+      const cove1 = new THREE.PointLight(0xffe6bd, 0.5, 26);
+      cove1.position.set(7.3, 12.2, 3.2); houseGroup.add(cove1); coveLights.push(cove1);
+      // Dining pendant light
+      addProp(-0.4, -0.1, 9.4, 13.0, 5.55, 5.85, chromeMat);
+      const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.55, 1.1, 16), applianceDarkMat);
+      shade.position.set(-0.25, 8.9, 5.7); shade.castShadow = true; houseGroup.add(shade);
+      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.28, 10, 8), coveLightMat);
+      bulb.position.set(-0.25, 8.45, 5.7); houseGroup.add(bulb);
+      const pendant = new THREE.PointLight(0xffe0ae, 0.65, 16);
+      pendant.position.set(-0.25, 8.5, 5.7); houseGroup.add(pendant); coveLights.push(pendant);
+
+      // Bedroom POP: simple peripheral borders (proportional, not elaborate)
+      function bedroomPop(x1, x2, z1, z2) {
+        const dy = 12.55;
+        addProp(x1, x2, dy, 13.0, z2 - 1.0, z2, popMat);
+        addProp(x1, x2, dy, 13.0, z1, z1 + 1.0, popMat);
+        addProp(x1, x1 + 1.0, dy, 13.0, z1 + 1.0, z2 - 1.0, popMat);
+        addProp(x2 - 1.0, x2, dy, 13.0, z1 + 1.0, z2 - 1.0, popMat);
+        makeSpotlight((x1 + x2) / 2 - 3, dy + 0.06, (z1 + z2) / 2);
+        makeSpotlight((x1 + x2) / 2 + 3, dy + 0.06, (z1 + z2) / 2);
+        makeSpotlight((x1 + x2) / 2, dy + 0.06, (z1 + z2) / 2 - 3);
+        makeSpotlight((x1 + x2) / 2, dy + 0.06, (z1 + z2) / 2 + 3);
+      }
+      bedroomPop(5.7, 17.75, -20.25, -5.75);    // master
+      bedroomPop(-18.125, -3.05, 0.75, 12.1);   // bedroom 2
+      bedroomPop(-18.125, -3.05, -24.6, -12.75);// bedroom 3
+
+      // ------------------------------ OUTDOOR PLANTS (2.2) ------------------------------
+      // Planting inside the perimeter landscape planter boxes (east front + south side)
+      const planterPlants = [
+        [-16.0, 25.9, 2.4, false], [-11.5, 25.9, 2.0, true], [-7.0, 25.9, 2.6, false],
+        [-3.0, 25.9, 1.8, true],
+        [19.5, -22.0, 2.6, false], [19.5, -16.5, 2.0, true], [19.5, -11.0, 2.4, false],
+        [19.5, -5.5, 1.8, true], [19.5, 0.5, 2.4, false], [19.5, 6.0, 2.0, true], [19.5, 11.0, 2.2, false]
+      ];
+      planterPlants.forEach(([px, pz, ph, bush]) => makePlant(px, pz, ph, bush));
+      // Lawn trees kept clear of the house & driveway
+      makePlant(-34, 18, 9.5, false);
+      makePlant(32, -14, 10.5, false);
+      makePlant(-30, -20, 8.5, false);
+      makePlant(26, 24, 9.0, false);
+      // Potted plants flanking the porch entrance steps at ground level
+      houseGroup.add(makePottedPlant(4.3, 0.05, 26.6, 1.6, 3.0));
+      houseGroup.add(makePottedPlant(15.7, 0.05, 26.6, 1.6, 3.0));
+      // Potted greenery in protected porch corners (not blocking door/window/circulation)
+      houseGroup.add(makePottedPlant(16.9, yFloor + 0.1, 13.6, 1.5, 3.2));
+      houseGroup.add(makePottedPlant(1.7, yFloor + 0.1, 23.7, 1.4, 2.6));
+    }
+
+    buildVillaModel();
+
+    // ============================================================================
+    // 8. 3D FLOATING ROOM LABELS (FOR DOLLHOUSE & ORBIT VIEWS)
+    // ============================================================================
+    const ROOM_DATA = [
+      { id: 'porch', name: "Front Porch", dim: "Teak-Tiled • Sunken Roof", pos: [9.5, 6.5, 18.5], look: [9.5, 6.5, 12.5] },
+      { id: 'living', name: "Living Room / Hall", dim: "21'0\" × 16'6\"", pos: [10.5, 6.5, -3.6], look: [6.0, 6.5, 6.5] },
+      { id: 'kitchen', name: "Kitchen", dim: "18'0\" × 12'0\" • East Platform", pos: [-4.5, 6.5, 14.2], look: [-12.5, 6.5, 22.0] },
+      { id: 'puja', name: "Puja Ghar", dim: "5'0\" × 3'0\" • Jali Screen", pos: [-2.3, 6.5, 22.9], look: [-2.3, 6.5, 24.3] },
+      { id: 'passage', name: "Central Passage", dim: "8'6\" → 4'0\" Open Axis", pos: [1.2, 6.5, -9.5], look: [-0.5, 6.5, -24.0] },
+      { id: 'master', name: "Master Bedroom", dim: "12'0\" × 14'6\" + Toilet", pos: [7.2, 6.5, -8.5], look: [11.5, 6.5, -16.0] },
+      { id: 'bed2', name: "Bedroom 2", dim: "14'0\" × 11'0\" + Washroom", pos: [-5.5, 6.5, 3.6], look: [-13.5, 6.5, 9.5] },
+      { id: 'bed3', name: "Bedroom 3", dim: "14'0\" × 12'0\"", pos: [-6.0, 6.5, -16.0], look: [-12.5, 6.5, -20.5] },
+      { id: 'sanitary', name: "Common Washroom", dim: "Toilet•Basin•Shower + WM", pos: [4.0, 6.5, -14.9], look: [4.0, 6.5, -19.5] },
+      { id: 'mumty', name: "Stairs & Mumty", dim: "Rooftop Terrace Exit", pos: [-11.5, 16.5, -10.0], look: [0.0, 15.5, -10.0] }
+    ];
+
+    const labelsContainer = document.getElementById('labels-container');
+    const labelElements = [];
+    let showLabels = true;
+
+    ROOM_DATA.forEach(r => {
+      const el = document.createElement('div');
+      el.className = 'room-label';
+      el.innerHTML = `${r.name}<span>${r.dim}</span>`;
+      el.onclick = () => teleportToRoom(r.id);
+      labelsContainer.appendChild(el);
+      labelElements.push({ el, pos: new THREE.Vector3(r.pos[0], r.pos[1] + 2.5, r.pos[2]) });
+    });
+
+    function updateFloatingLabels() {
+      if (!showLabels || currentMode === 'walk') {
+        labelsContainer.style.display = 'none';
+        return;
+      }
+      labelsContainer.style.display = 'block';
+      labelElements.forEach(item => {
+        const projected = item.pos.clone().project(camera);
+        if (projected.z > 1) {
+          item.el.style.display = 'none';
+        } else {
+          const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
+          const y = (-(projected.y * 0.5) + 0.5) * window.innerHeight;
+          item.el.style.display = 'block';
+          item.el.style.left = `${x}px`;
+          item.el.style.top = `${y}px`;
+        }
+      });
+    }
+
+    // ============================================================================
+    // 9. ASIAN PAINTS PALETTE ENGINE & SURFACE RAYCASTER
+    // ============================================================================
+    let activeSurfaceCategory = 'ext_main';
+    let isClayMode = true;
+
+    function renderSwatchGrid() {
+      const grid = document.getElementById('swatch-grid');
+      grid.innerHTML = '';
+      ASIAN_PAINTS_SHADES.forEach(shade => {
+        const div = document.createElement('div');
+        div.className = 'color-swatch';
+        div.innerHTML = `
+          <div class="swatch-circle" style="background:${shade.hex}"></div>
+          <div class="swatch-name">${shade.name}</div>
+          <div class="swatch-code">${shade.code}</div>
+        `;
+        div.onclick = () => applyShadeToCategory(activeSurfaceCategory, shade);
+        grid.appendChild(div);
+      });
+    }
+    renderSwatchGrid();
+
+    function onSurfaceCategoryChange(cat) {
+      activeSurfaceCategory = cat;
+      document.getElementById('hud-selection-text').innerHTML =
+        `<strong>Selected Surface:</strong> <span style="color:var(--accent)">${CATEGORY_LABELS[cat]}</span>`;
+    }
+
+    function applyShadeToCategory(category, shade) {
+      isClayMode = false;
+      document.getElementById('toggle-clay').classList.remove('on');
+      document.getElementById('theme-clay').classList.remove('active');
+
+      const mat = materials[category];
+      if (!mat) return;
+
+      if (category === 'porch_wood') {
+        mat.map = createTeakPlankTexture(shade.hex);
+        mat.color.set('#ffffff');
+      } else if (category === 'stone_niche') {
+        mat.map = createSplitStoneTexture(shade.hex);
+        mat.color.set('#ffffff');
+      } else {
+        mat.map = null;
+        mat.color.set(shade.hex);
+      }
+      mat.needsUpdate = true;
+
+      document.getElementById('hud-selection-text').innerHTML =
+        `<strong>Applied:</strong> <span style="color:var(--accent)">${shade.name} (${shade.code})</span> → ${CATEGORY_LABELS[category]}`;
+    }
+
+    function enableClayMode() {
+      isClayMode = true;
+      document.getElementById('toggle-clay').classList.add('on');
+      document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+      document.getElementById('theme-clay').classList.add('active');
+
+      Object.keys(CLAY_PALETTE).forEach(key => {
+        materials[key].map = null;
+        materials[key].color.set(CLAY_PALETTE[key]);
+        materials[key].roughness = 0.85;
+        materials[key].needsUpdate = true;
+      });
+      doorWoodMat.map = null;
+      doorWoodMat.color.set(0xd8d8d8);
+      graniteStepMat.map = null;
+      graniteStepMat.color.set(0xd0d0d0);
+      document.getElementById('hud-selection-text').innerHTML =
+        `<strong>Mode:</strong> <span style="color:var(--accent)">Pure Uncolored Clay Massing (#EEEEEE)</span>`;
+    }
+
+    function applyCuratedTheme(themeIndex) {
+      isClayMode = false;
+      document.getElementById('toggle-clay').classList.remove('on');
+      document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+      document.getElementById(`theme-${themeIndex}`).classList.add('active');
+
+      const setMat = (key, hex, useTexture = null) => {
+        if (useTexture === 'wood') {
+          materials[key].map = createTeakPlankTexture(hex);
+          materials[key].color.set('#ffffff');
+          materials[key].roughness = 0.55;
+        } else if (useTexture === 'stone') {
+          materials[key].map = createSplitStoneTexture(hex);
+          materials[key].color.set('#ffffff');
+          materials[key].roughness = 0.8;
+        } else if (useTexture === 'granite') {
+          materials[key].map = createGraniteTexture(false);
+          materials[key].color.set('#ffffff');
+          materials[key].roughness = 0.3;
+        } else {
+          // Painted surface: subtle plaster micro-noise so walls are not dead flat
+          materials[key].map = wallPaintNoise;
+          materials[key].color.set(hex);
+          materials[key].roughness = 0.82;
+        }
+        materials[key].needsUpdate = true;
+      };
+
+      if (themeIndex === 1) {
+        // Theme 1: Warm Sandstone & Teak (Exact Site Render Reference Match)
+        setMat('ext_main', '#F3EFE6');       // Innocent White L180
+        setMat('box_grooves', '#C4B59D');    // Sand Drift 8461
+        setMat('parapet_box', '#C89B61');    // Camel Skin 8515
+        setMat('pillar_plinth', '#474B4E');  // Thundercloud 8305
+        setMat('porch_wood', '#7A4327', 'wood'); // DARK teak plank tiles (fixed finish)
+        setMat('stone_niche', '#686A6D', 'stone'); // Split-Face Stone
+        setMat('int_living', '#EAE6DD');     // Canvas Cream 0313
+        setMat('int_master', '#DFD5C6');     // Almond Frost 0957
+        setMat('int_bed23', '#F3EFE6');
+        setMat('int_kitchen', '#FAF7EF');
+        setMat('granite_steps', '#ffffff', 'granite'); // Black granite steps
+        setMat('slab_trim', '#8B755A');
+      } else if (themeIndex === 2) {
+        // Theme 2: Soft Subtle Pastels
+        setMat('ext_main', '#F6F3EC');       // Cream Pie L152
+        setMat('box_grooves', '#C4B59D');    // Sand Drift 8461
+        setMat('parapet_box', '#D9DFE3');    // Gem Stone 7172
+        setMat('pillar_plinth', '#606466');  // Pewter 8298
+        setMat('porch_wood', '#7A4327', 'wood');
+        setMat('stone_niche', '#686A6D', 'stone');
+        setMat('int_living', '#D8EAE6');     // Aqua Hint L114
+        setMat('int_master', '#E8E1E8');     // Lavender Lace 7156
+        setMat('int_bed23', '#E5DDEB');      // Lilac Breeze 7188
+        setMat('int_kitchen', '#D8EAE6');
+        setMat('granite_steps', '#ffffff', 'granite');
+        setMat('slab_trim', '#9C8468');
+      } else if (themeIndex === 3) {
+        // Theme 3: Modern Minimalist Greige & Teak
+        setMat('ext_main', '#FAF7EF');       // Morning Glory 0765
+        setMat('box_grooves', '#AFA89B');    // Raw Jute 8513
+        setMat('parapet_box', '#5E4632');    // Nut Brown-N 0419
+        setMat('pillar_plinth', '#383A3C');  // Charcoal Grey 8297
+        setMat('porch_wood', '#7A4327', 'wood');
+        setMat('stone_niche', '#555759', 'stone');
+        setMat('int_living', '#EAE6DD');
+        setMat('int_master', '#AFA89B');
+        setMat('int_bed23', '#DFD5C6');
+        setMat('int_kitchen', '#FAF7EF');
+        setMat('granite_steps', '#ffffff', 'granite');
+        setMat('slab_trim', '#6E5A44');
+      } else if (themeIndex === 4) {
+        // Theme 4: Vastu Harmonized (East Entrance)
+        setMat('ext_main', '#EAE6DD');       // Canvas Cream 0313
+        setMat('box_grooves', '#C4B59D');    // Sand Drift 8461
+        setMat('parapet_box', '#C89B61');    // Camel Skin 8515
+        setMat('pillar_plinth', '#606466');  // Pewter 8298
+        setMat('porch_wood', '#7A4327', 'wood');
+        setMat('stone_niche', '#686A6D', 'stone');
+        setMat('int_living', '#FAF7EF');
+        setMat('int_master', '#DFD5C6');
+        setMat('int_bed23', '#D8EAE6');
+        setMat('int_kitchen', '#F6F3EC');
+        setMat('granite_steps', '#ffffff', 'granite');
+        setMat('slab_trim', '#9C8468');
+      }
+      // Doors take a warm teak finish in every curated theme
+      doorWoodMat.map = createTeakPlankTexture('#6E4226');
+      doorWoodMat.color.set('#ffffff');
+      doorWoodMat.roughness = 0.55;
+      graniteStepMat.map = createGraniteTexture(false);
+      graniteStepMat.color.set('#ffffff');
+    }
+
+    // Raycasting Click-to-Select Surface on 3D Canvas
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let downPos = { x: 0, y: 0 };
+
+    renderer.domElement.addEventListener('pointerdown', e => {
+      downPos = { x: e.clientX, y: e.clientY };
+    });
+
+    renderer.domElement.addEventListener('pointerup', e => {
+      const dist = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y);
+      if (dist > 5) return; // Ignore camera drag
+
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+
+      const intersects = raycaster.intersectObjects(paintableMeshes, false);
+      if (intersects.length > 0) {
+        const hit = intersects[0].object;
+        const cat = hit.userData.category;
+        if (cat && CATEGORY_LABELS[cat]) {
+          activeSurfaceCategory = cat;
+          document.getElementById('surface-selector').value = cat;
+          onSurfaceCategoryChange(cat);
+        }
+      }
+    });
+
+    // ============================================================================
+    // 10. EXPLORATION MODES, CAMERA PRESETS & FIRST-PERSON WALKTHROUGH
+    // ============================================================================
+    let currentMode = 'orbit';
+    let tweenState = null;
+
+    function animateCamera(targetPos, targetLook, duration = 900) {
+      tweenState = {
+        startPos: camera.position.clone(),
+        startLook: controls.target.clone(),
+        endPos: new THREE.Vector3(...targetPos),
+        endLook: new THREE.Vector3(...targetLook),
+        startTime: performance.now(),
+        duration
+      };
+    }
+
+    function setExplorationMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.mode-switcher .btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`mode-${mode}`).classList.add('active');
+
+      const hudMode = document.getElementById('hud-mode-text');
+
+      if (mode === 'orbit') {
+        roofGroup.visible = true;
+        document.getElementById('toggle-roof').classList.add('on');
+        document.getElementById('toggle-roof').textContent = 'Roof: Attached';
+        controls.maxDistance = 170;
+        tweenToPreset('iso');
+        hudMode.innerHTML = `<strong>Mode:</strong> Exterior Orbit • <span class="kbd">Left-Drag</span> Rotate • <span class="kbd">Right-Drag</span> Pan • <span class="kbd">Scroll</span> Zoom`;
+      } else if (mode === 'dollhouse') {
+        roofGroup.visible = false;
+        document.getElementById('toggle-roof').classList.remove('on');
+        document.getElementById('toggle-roof').textContent = 'Roof: Detached';
+        controls.maxDistance = 170;
+        animateCamera([36, 46, 38], [0, 4, 0], 1000);
+        hudMode.innerHTML = `<strong>Mode:</strong> Cutaway Dollhouse • Click any floating 3D room label to teleport inside`;
+      } else if (mode === 'walk') {
+        roofGroup.visible = true;
+        document.getElementById('toggle-roof').classList.add('on');
+        document.getElementById('toggle-roof').textContent = 'Roof: Attached';
+        teleportToRoom('living');
+        hudMode.innerHTML = `<strong>Mode:</strong> Walk Inside (5'2" Eye) • <span class="kbd">W A S D</span> / <span class="kbd">Arrows</span> Walk • <span class="kbd">Mouse Drag</span> Look 360°`;
+      }
+    }
+
+    function tweenToPreset(preset) {
+      if (currentMode === 'walk') setExplorationMode('orbit');
+      const presets = {
+        iso:   { pos: [52, 20, 56], look: [0, 7, 0] },      // Exact angle of WhatsApp Render Reference Photo 8
+        front: { pos: [3, 11, 68],  look: [3, 8, 0] },      // East Front Elevation (Photo 7)
+        south: { pos: [66, 12, -4], look: [0, 7, -4] },     // South Box Windows & Stone Niche (Photo 6)
+        north: { pos: [-66, 14, -2],look: [0, 8, -2] },     // North 5 Columns & Mumty (Photo 1 & 2)
+        west:  { pos: [0, 12, -68], look: [0, 7, 0] },      // West Rear Service Exit
+        top:   { pos: [0, 82, 0.1], look: [0, 0, 0] }       // Top Orthographic-style Plan
+      };
+      const p = presets[preset];
+      if (p) animateCamera(p.pos, p.look, 850);
+    }
+
+    function teleportToRoom(roomId) {
+      const room = ROOM_DATA.find(r => r.id === roomId);
+      if (!room) return;
+
+      currentMode = 'walk';
+      document.querySelectorAll('.mode-switcher .btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('mode-walk').classList.add('active');
+
+      roofGroup.visible = true;
+      document.getElementById('toggle-roof').classList.add('on');
+      document.getElementById('toggle-roof').textContent = 'Roof: Attached';
+
+      // Position camera at 5' 2" eye level above 2' 6" plinth (Y = 7.67', or 17.6' for rooftop mumty)
+      const eyeY = roomId === 'mumty' ? 17.6 : 7.67;
+      const pos = new THREE.Vector3(room.pos[0], eyeY, room.pos[2]);
+      const dir = new THREE.Vector3(room.look[0] - room.pos[0], 0, room.look[2] - room.pos[2]).normalize();
+      const target = pos.clone().add(dir.multiplyScalar(2.5));
+
+      animateCamera([pos.x, pos.y, pos.z], [target.x, eyeY, target.z], 750);
+
+      document.getElementById('hud-mode-text').innerHTML =
+        `<strong>Inside:</strong> <span style="color:var(--accent)">${room.name} (${room.dim})</span> • <span class="kbd">WASD</span> Walk • <span class="kbd">Drag</span> Look 360°`;
+    }
+
+    // Environment Toggles
+    let skyOn = true;
+    function toggleEnvironment(type) {
+      if (type === 'sky') {
+        skyOn = !skyOn;
+        skyDome.visible = skyOn;
+        scene.background = new THREE.Color(skyOn ? 0xdfe6ec : 0x1d2026);
+        if (scene.fog) scene.fog.color.set(skyOn ? 0xdfe6ec : 0x1d2026);
+        const btn = document.getElementById('toggle-sky');
+        btn.classList.toggle('on', skyOn);
+        btn.textContent = skyOn ? 'Sky: Daylight' : 'Sky: Void';
+      } else if (type === 'ground') {
+        groundGroup.visible = !groundGroup.visible;
+        const btn = document.getElementById('toggle-ground');
+        btn.classList.toggle('on', groundGroup.visible);
+        btn.textContent = groundGroup.visible ? 'Ground: Lawn & Pavers' : 'Ground: Hidden';
+      } else if (type === 'roof') {
+        roofGroup.visible = !roofGroup.visible;
+        const btn = document.getElementById('toggle-roof');
+        btn.classList.toggle('on', roofGroup.visible);
+        btn.textContent = roofGroup.visible ? 'Roof: Attached' : 'Roof: Detached';
+      } else if (type === 'labels') {
+        showLabels = !showLabels;
+        document.getElementById('toggle-labels').classList.toggle('on', showLabels);
+      }
+    }
+
+    // WASD / Arrow Keys First-Person Walking Movement
+    const keysPressed = {};
+    window.addEventListener('keydown', e => { keysPressed[e.code] = true; });
+    window.addEventListener('keyup', e => { keysPressed[e.code] = false; });
+
+    function updateWalkMovement(delta) {
+      if (currentMode !== 'walk' && !keysPressed['KeyW'] && !keysPressed['KeyS'] && !keysPressed['KeyA'] && !keysPressed['KeyD']) return;
+      const speed = 14.0 * delta;
+      const forward = new THREE.Vector3();
+      camera.getWorldDirection(forward);
+      forward.y = 0;
+      forward.normalize();
+
+      const right = new THREE.Vector3().crossVectors(forward, camera.up).normalize();
+      const move = new THREE.Vector3();
+
+      if (keysPressed['KeyW'] || keysPressed['ArrowUp']) move.add(forward);
+      if (keysPressed['KeyS'] || keysPressed['ArrowDown']) move.sub(forward);
+      if (keysPressed['KeyD'] || keysPressed['ArrowRight']) move.add(right);
+      if (keysPressed['KeyA'] || keysPressed['ArrowLeft']) move.sub(right);
+
+      if (move.lengthSq() > 0) {
+        move.normalize().multiplyScalar(speed);
+        camera.position.add(move);
+        controls.target.add(move);
+      }
+    }
+
+    // ============================================================================
+    // 11. RENDER LOOP & RESIZE HANDLER
+    // ============================================================================
+    let lastTime = performance.now();
+
+    function animate(now) {
+      requestAnimationFrame(animate);
+      const delta = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      if (tweenState) {
+        const elapsed = now - tweenState.startTime;
+        const t = Math.min(elapsed / tweenState.duration, 1);
+        const ease = 1 - Math.pow(1 - t, 3); // Cubic ease-out
+        camera.position.lerpVectors(tweenState.startPos, tweenState.endPos, ease);
+        controls.target.lerpVectors(tweenState.startLook, tweenState.endLook, ease);
+        if (t >= 1) tweenState = null;
+      }
+
+      // Slow-spinning ceiling fans (living room, porch & bedrooms)
+      rotatingFans.forEach((fan, i) => { fan.rotation.y += delta * (2.2 + i * 0.25); });
+
+      updateWalkMovement(delta);
+      controls.update();
+      updateFloatingLabels();
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initialize in the REALISTIC curated finish (Theme 1 - Render Match) with
+    // daylight sky, lawn & plants ON (clay mode stays available via the toggle)
+    applyCuratedTheme(1);
+    animate(performance.now());
+  </script>
+</body>
+</html>

@@ -25,10 +25,35 @@ export default function App() {
 
   // Paint & Theme state (Default: Theme 1 - Realistic Site Render)
   const defaultTheme = CURATED_THEMES[0];
-  const [categoryColors, setCategoryColors] = useState<Record<SurfaceCategory, string>>(
-    defaultTheme.colors
-  );
-  const [activeThemeId, setActiveThemeId] = useState<number | 'clay'>(1);
+  const [paintSettings, setPaintSettings] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('home-planner-paint') || 'null');
+      const colors = Object.fromEntries(
+        (Object.keys(defaultTheme.colors) as SurfaceCategory[]).map((category) => {
+          const savedColor = saved?.colors?.[category];
+          return [category, typeof savedColor === 'string' && /^#[\da-f]{6}$/i.test(savedColor)
+            ? savedColor
+            : defaultTheme.colors[category]];
+        })
+      ) as Record<SurfaceCategory, string>;
+      const themeId = saved?.themeId === 'clay' || saved?.themeId === -1 ||
+        CURATED_THEMES.some((theme) => theme.id === saved?.themeId)
+        ? saved.themeId
+        : defaultTheme.id;
+      return { colors, themeId: themeId as number | 'clay' };
+    } catch {
+      return { colors: defaultTheme.colors, themeId: defaultTheme.id };
+    }
+  });
+  const { colors: categoryColors, themeId: activeThemeId } = paintSettings;
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('home-planner-paint', JSON.stringify(paintSettings));
+    } catch {
+      // The live palette still works if browser storage is unavailable.
+    }
+  }, [paintSettings]);
   const [activeCategory, setActiveCategory] = useState<SurfaceCategory>('ext_main');
 
   // Time of Day & Lighting state
@@ -41,7 +66,7 @@ export default function App() {
   const [isGroundActive, setIsGroundActive] = useState<boolean>(true);
   const [isRoofActive, setIsRoofActive] = useState<boolean>(true);
   const [isFansActive, setIsFansActive] = useState<boolean>(true);
-  const [showLabels, setShowLabels] = useState<boolean>(true);
+  const [showLabels, setShowLabels] = useState<boolean>(false);
 
   // Active room for Walk Inside mode
   const [activeRoomId, setActiveRoomId] = useState<string>('living');
@@ -66,7 +91,7 @@ export default function App() {
   const [isBlenderOpen, setIsBlenderOpen] = useState<boolean>(false);
 
   // Cinematic Postprocessing & glTF Export state
-  const [isCinematicBloom, setIsCinematicBloom] = useState<boolean>(false);
+  const [isCinematicBloom, setIsCinematicBloom] = useState<boolean>(true);
   const [isExportingGLB, setIsExportingGLB] = useState<boolean>(false);
   const exportGLBRef = React.useRef<(() => Promise<boolean>) | null>(null);
 
@@ -138,25 +163,22 @@ export default function App() {
 
   // Paint color application handler
   const handleApplyShade = (category: SurfaceCategory, hex: string) => {
-    setCategoryColors((prev) => ({
-      ...prev,
-      [category]: hex
+    setPaintSettings((prev) => ({
+      colors: { ...prev.colors, [category]: hex },
+      themeId: -1
     }));
-    setActiveThemeId(-1); // Custom state
   };
 
   // Apply curated theme
   const handleApplyTheme = (theme: CuratedTheme) => {
-    setCategoryColors(theme.colors);
-    setActiveThemeId(theme.id);
+    setPaintSettings({ colors: theme.colors, themeId: theme.id });
   };
 
   // Clay mode
   const handleEnableClayMode = () => {
     const clayTheme = CURATED_THEMES.find((t) => t.id === 'clay');
     if (clayTheme) {
-      setCategoryColors(clayTheme.colors);
-      setActiveThemeId('clay');
+      setPaintSettings({ colors: clayTheme.colors, themeId: 'clay' });
     }
   };
 

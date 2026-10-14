@@ -267,9 +267,9 @@ export const LeftControlPanel: React.FC<LeftControlPanelProps> = ({
                 <div className="flex flex-col">
                   <span className="font-semibold text-gray-200 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    Cinematic PBR Bloom
+                    Photo-Quality Shading
                   </span>
-                  <span className="text-[10px] text-gray-400">Soft glow on LEDs, sconces & sunlight</span>
+                  <span className="text-[10px] text-gray-400">Contact shadows and soft light bloom</span>
                 </div>
                 <button
                   onClick={() => setIsCinematicBloom(!isCinematicBloom)}
@@ -277,7 +277,7 @@ export const LeftControlPanel: React.FC<LeftControlPanelProps> = ({
                     isCinematicBloom ? 'bg-amber-400 text-slate-950 shadow-sm' : 'bg-white/10 text-gray-400'
                   }`}
                 >
-                  {isCinematicBloom ? 'ON' : 'OFF'}
+                  {isCinematicBloom ? 'ON' : 'FAST'}
                 </button>
               </div>
 

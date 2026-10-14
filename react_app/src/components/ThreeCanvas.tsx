@@ -2,10 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { Sky } from 'three/examples/jsm/objects/Sky.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
 import {
   SurfaceCategory,
   CuratedTheme,
@@ -23,6 +25,7 @@ import {
   createWoodGrainTexture,
   createFabricTexture,
   createPlasterTexture,
+  createPlasterBumpTexture,
   createGrassTexture
 } from '../utils/proceduralTextures';
 
@@ -71,6 +74,9 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
   const controlsRef = useRef<OrbitControls | null>(null);
   const composerRef = useRef<EffectComposer | null>(null);
   const bloomPassRef = useRef<UnrealBloomPass | null>(null);
+  const isCinematicBloomRef = useRef(isCinematicBloom);
+  const isFansActiveRef = useRef(isFansActive);
+  const lastLabelCameraRef = useRef<{ position: THREE.Vector3; quaternion: THREE.Quaternion } | null>(null);
 
   // Group references
   const houseGroupRef = useRef<THREE.Group>(new THREE.Group());
@@ -79,6 +85,7 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
   const interiorLightsRef = useRef<THREE.Group>(new THREE.Group());
   const sunLightRef = useRef<THREE.DirectionalLight | null>(null);
   const hemiLightRef = useRef<THREE.HemisphereLight | null>(null);
+  const skyRef = useRef<Sky | null>(null);
   const sconceLightsRef = useRef<THREE.PointLight[]>([]);
   const porchLightsRef = useRef<THREE.PointLight[]>([]);
   const ceilingFansRef = useRef<THREE.Group[]>([]);
@@ -107,6 +114,11 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
+    const sky = new Sky();
+    sky.scale.setScalar(450);
+    scene.add(sky);
+    skyRef.current = sky;
+
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.3, 500);
     camera.position.set(52, 22, 58);
     cameraRef.current = camera;
@@ -120,9 +132,9 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.08;
+    renderer.toneMappingExposure = 1;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.VSMShadowMap;
     rendererRef.current = renderer;
 
     mountRef.current.appendChild(renderer.domElement);
@@ -135,6 +147,12 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     const composer = new EffectComposer(renderer, renderTarget);
     const renderPass = new RenderPass(scene, camera);
     composer.addPass(renderPass);
+
+    const ssaoPass = new SSAOPass(scene, camera, width, height, 16);
+    ssaoPass.kernelRadius = 1.2;
+    ssaoPass.minDistance = 0.001;
+    ssaoPass.maxDistance = 0.35;
+    composer.addPass(ssaoPass);
 
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(width, height),
@@ -171,6 +189,8 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     const sunLight = new THREE.DirectionalLight(0xfff4e0, sunIntensity);
     sunLight.position.set(58, 72, 50);
     sunLight.castShadow = true;
+    sunLight.shadow.radius = 4;
+    sunLight.shadow.blurSamples = 8;
     sunLight.shadow.mapSize.width = 2048;
     sunLight.shadow.mapSize.height = 2048;
     sunLight.shadow.camera.near = 10;
@@ -237,6 +257,7 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       if (!mountRef.current || !rendererRef.current || !cameraRef.current) return;
       const w = mountRef.current.clientWidth;
       const h = mountRef.current.clientHeight;
+      lastLabelCameraRef.current = null;
       cameraRef.current.aspect = w / h;
       cameraRef.current.updateProjectionMatrix();
       rendererRef.current.setSize(w, h);
@@ -313,7 +334,7 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       }
 
       // Ceiling fans rotation
-      if (isFansActive && ceilingFansRef.current.length > 0) {
+      if (isFansActiveRef.current && ceilingFansRef.current.length > 0) {
         ceilingFansRef.current.forEach((fan) => {
           fan.rotation.y += delta * 6.5;
         });
@@ -357,21 +378,30 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       controlsRef.current?.update();
 
       // Project 3D room label coordinates
-      if (onLabelPositionsUpdate && cameraRef.current && mountRef.current) {
+      const labelCamera = cameraRef.current;
+      const previousLabelCamera = lastLabelCameraRef.current;
+      const cameraMoved = labelCamera && (!previousLabelCamera ||
+        previousLabelCamera.position.distanceToSquared(labelCamera.position) > 0.00001 ||
+        previousLabelCamera.quaternion.angleTo(labelCamera.quaternion) > 0.0001);
+      if (onLabelPositionsUpdate && labelCamera && mountRef.current && cameraMoved) {
         const rect = mountRef.current.getBoundingClientRect();
         const positions = ROOM_DEFINITIONS.map((r) => {
           const vec = new THREE.Vector3(r.pos[0], r.pos[1] + 2.8, r.pos[2]);
-          vec.project(cameraRef.current!);
+          vec.project(labelCamera);
           const visible = vec.z < 1;
           const x = (vec.x * 0.5 + 0.5) * rect.width;
           const y = (-(vec.y * 0.5) + 0.5) * rect.height;
           return { id: r.id, x, y, visible };
         });
         onLabelPositionsUpdate(positions);
+        lastLabelCameraRef.current = {
+          position: labelCamera.position.clone(),
+          quaternion: labelCamera.quaternion.clone()
+        };
       }
 
       if (sceneRef.current && cameraRef.current) {
-        if (isCinematicBloom && composerRef.current) {
+        if (isCinematicBloomRef.current && composerRef.current) {
           composerRef.current.render();
         } else if (rendererRef.current) {
           rendererRef.current.render(sceneRef.current, cameraRef.current);
@@ -388,13 +418,23 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       window.removeEventListener('keyup', handleKeyUp);
       domEl.removeEventListener('pointerdown', handlePointerDown);
       domEl.removeEventListener('pointerup', handlePointerUp);
+      ssaoPass.dispose();
+      bloomPass.dispose();
       composer.dispose();
       renderer.dispose();
       if (mountRef.current && renderer.domElement) {
         mountRef.current.removeChild(renderer.domElement);
       }
     };
+  }, []);
+
+  useEffect(() => {
+    isCinematicBloomRef.current = isCinematicBloom;
   }, [isCinematicBloom]);
+
+  useEffect(() => {
+    isFansActiveRef.current = isFansActive;
+  }, [isFansActive]);
 
   // Adjust Postprocessing Bloom dynamically with Time of Day (never blooming white walls)
   useEffect(() => {
@@ -469,6 +509,16 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       hemi.groundColor.setHex(0x111318);
       sconceLightsRef.current.forEach((l) => (l.intensity = 2.4));
     }
+
+    const sky = skyRef.current;
+    if (sky) {
+      sky.visible = isSkyActive && timeOfDay !== 'night';
+      sky.material.uniforms.sunPosition.value.copy(sun.position).normalize();
+      sky.material.uniforms.turbidity.value = timeOfDay === 'sunset' ? 9 : 3;
+      sky.material.uniforms.rayleigh.value = timeOfDay === 'sunset' ? 1.7 : 1.2;
+      sky.material.uniforms.mieCoefficient.value = timeOfDay === 'sunset' ? 0.008 : 0.002;
+      if (sky.visible) sceneRef.current.background = null;
+    }
   }, [timeOfDay, isSkyActive, sunIntensity]);
 
   useEffect(() => {
@@ -536,19 +586,20 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     const woodGrainMap = createWoodGrainTexture();
     const fabricWeaveMap = createFabricTexture();
     const wallPlasterNoise = createPlasterTexture();
+    const wallPlasterBump = createPlasterBumpTexture();
     const grassMap = createGrassTexture();
 
     // Materials registry
     const mats: Record<SurfaceCategory, THREE.MeshStandardMaterial> = {
-      ext_main: new THREE.MeshStandardMaterial({ color: categoryColors.ext_main, roughness: 0.76, metalness: 0.03, map: wallPlasterNoise }),
-      box_grooves: new THREE.MeshStandardMaterial({ color: categoryColors.box_grooves, roughness: 0.72, metalness: 0.04, map: wallPlasterNoise }),
-      parapet_box: new THREE.MeshStandardMaterial({ color: categoryColors.parapet_box, roughness: 0.7, metalness: 0.04, map: wallPlasterNoise }),
-      pillar_plinth: new THREE.MeshStandardMaterial({ color: categoryColors.pillar_plinth, roughness: 0.65, metalness: 0.08, map: wallPlasterNoise }),
-      int_living: new THREE.MeshStandardMaterial({ color: categoryColors.int_living, roughness: 0.85, map: wallPlasterNoise }),
-      int_master: new THREE.MeshStandardMaterial({ color: categoryColors.int_master, roughness: 0.85, map: wallPlasterNoise }),
-      int_bed23: new THREE.MeshStandardMaterial({ color: categoryColors.int_bed23, roughness: 0.85, map: wallPlasterNoise }),
-      int_kitchen: new THREE.MeshStandardMaterial({ color: categoryColors.int_kitchen, roughness: 0.85, map: wallPlasterNoise }),
-      slab_trim: new THREE.MeshStandardMaterial({ color: categoryColors.slab_trim, roughness: 0.7, metalness: 0.05, map: wallPlasterNoise })
+      ext_main: new THREE.MeshStandardMaterial({ color: categoryColors.ext_main, roughness: 0.76, metalness: 0.03, map: wallPlasterNoise, bumpMap: wallPlasterBump, bumpScale: 0.025 }),
+      box_grooves: new THREE.MeshStandardMaterial({ color: categoryColors.box_grooves, roughness: 0.72, metalness: 0.04, map: wallPlasterNoise, bumpMap: wallPlasterBump, bumpScale: 0.025 }),
+      parapet_box: new THREE.MeshStandardMaterial({ color: categoryColors.parapet_box, roughness: 0.7, metalness: 0.04, map: wallPlasterNoise, bumpMap: wallPlasterBump, bumpScale: 0.025 }),
+      pillar_plinth: new THREE.MeshStandardMaterial({ color: categoryColors.pillar_plinth, roughness: 0.65, metalness: 0.08, map: wallPlasterNoise, bumpMap: wallPlasterBump, bumpScale: 0.025 }),
+      int_living: new THREE.MeshStandardMaterial({ color: categoryColors.int_living, roughness: 0.85, map: wallPlasterNoise, bumpMap: wallPlasterBump, bumpScale: 0.025 }),
+      int_master: new THREE.MeshStandardMaterial({ color: categoryColors.int_master, roughness: 0.85, map: wallPlasterNoise, bumpMap: wallPlasterBump, bumpScale: 0.025 }),
+      int_bed23: new THREE.MeshStandardMaterial({ color: categoryColors.int_bed23, roughness: 0.85, map: wallPlasterNoise, bumpMap: wallPlasterBump, bumpScale: 0.025 }),
+      int_kitchen: new THREE.MeshStandardMaterial({ color: categoryColors.int_kitchen, roughness: 0.85, map: wallPlasterNoise, bumpMap: wallPlasterBump, bumpScale: 0.025 }),
+      slab_trim: new THREE.MeshStandardMaterial({ color: categoryColors.slab_trim, roughness: 0.7, metalness: 0.05, map: wallPlasterNoise, bumpMap: wallPlasterBump, bumpScale: 0.025 })
     };
     materialsRef.current = mats;
 
@@ -659,7 +710,7 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       z2: number,
       matKeyOrMat: SurfaceCategory | THREE.Material,
       parent: THREE.Group = houseGroup,
-      addEdges = true
+      addEdges = false
     ) {
       const w = Math.abs(x2 - x1);
       const h = Math.abs(y2 - y1);

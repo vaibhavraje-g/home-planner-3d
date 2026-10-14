@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Palette,
   ChevronRight,
@@ -44,6 +44,13 @@ export const RightPaintStudio: React.FC<RightPaintStudioProps> = ({
 
   const currentCategoryMeta = CATEGORY_LABELS[activeCategory];
   const currentColor = categoryColors[activeCategory];
+  const isCustomHexValid = /^#?[\da-f]{6}$/i.test(customHex.trim());
+
+  useEffect(() => setCustomHex(currentColor), [activeCategory, currentColor]);
+
+  const applyCustomHex = () => {
+    if (isCustomHexValid) onApplyShade(activeCategory, `#${customHex.trim().replace(/^#/, '')}`);
+  };
 
   // Filtered Asian Paints Shades
   const filteredShades = useMemo(() => {
@@ -127,10 +134,13 @@ export const RightPaintStudio: React.FC<RightPaintStudioProps> = ({
                 </span>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px] text-gray-400 font-mono">{currentColor}</span>
-                  <div
-                    className="w-4 h-4 rounded-full border border-white/40 shadow-sm"
-                    style={{ backgroundColor: currentColor }}
-                    title={`Current color: ${currentColor}`}
+                  <input
+                    type="color"
+                    value={currentColor}
+                    onChange={(event) => onApplyShade(activeCategory, event.target.value.toUpperCase())}
+                    aria-label={`Choose color for ${currentCategoryMeta.title}`}
+                    title="Choose a custom paint color"
+                    className="h-7 w-8 cursor-pointer rounded border border-white/30 bg-transparent p-0.5"
                   />
                 </div>
               </div>
@@ -223,18 +233,17 @@ export const RightPaintStudio: React.FC<RightPaintStudioProps> = ({
                     placeholder="#HEX"
                     value={customHex}
                     onChange={(e) => setCustomHex(e.target.value)}
-                    className="w-16 px-1.5 py-0.5 rounded bg-black/50 border border-white/20 text-white text-[10px] font-mono outline-none"
+                    onKeyDown={(e) => e.key === 'Enter' && applyCustomHex()}
+                    aria-label="Custom paint color hex code"
+                    maxLength={7}
+                    className="w-20 px-1.5 py-1 rounded bg-black/50 border border-white/20 text-white text-[10px] font-mono outline-none focus:border-amber-400"
                   />
                   <button
-                    onClick={() => {
-                      if (/^#?[0-9A-Fa-f]{6}$/.test(customHex)) {
-                        const formatted = customHex.startsWith('#') ? customHex : `#${customHex}`;
-                        onApplyShade(activeCategory, formatted);
-                      }
-                    }}
-                    className="px-1.5 py-0.5 rounded bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold"
+                    onClick={applyCustomHex}
+                    disabled={!isCustomHexValid}
+                    className="px-2 py-1 rounded bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    Set
+                    Apply
                   </button>
                 </div>
               </div>
