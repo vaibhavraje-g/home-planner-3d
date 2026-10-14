@@ -15,7 +15,11 @@ import {
   createCeilingLouverTexture,
   createVitrifiedFloorTexture,
   createSplitStoneTexture,
-  createBlackGraniteTexture
+  createBlackGraniteTexture,
+  createWoodGrainTexture,
+  createFabricTexture,
+  createPlasterTexture,
+  createGrassTexture
 } from '../utils/proceduralTextures';
 
 interface ThreeCanvasProps {
@@ -462,17 +466,23 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     const WT = 0.75;     // 9" exterior wall thickness
     const IT = 0.5;      // 6" interior partition thickness
 
+    // Fixed Architectural & Interior Textures
+    const woodGrainMap = createWoodGrainTexture();
+    const fabricWeaveMap = createFabricTexture();
+    const wallPlasterNoise = createPlasterTexture();
+    const grassMap = createGrassTexture();
+
     // Materials registry
     const mats: Record<SurfaceCategory, THREE.MeshStandardMaterial> = {
-      ext_main: new THREE.MeshStandardMaterial({ color: categoryColors.ext_main, roughness: 0.76, metalness: 0.03 }),
-      box_grooves: new THREE.MeshStandardMaterial({ color: categoryColors.box_grooves, roughness: 0.72, metalness: 0.04 }),
-      parapet_box: new THREE.MeshStandardMaterial({ color: categoryColors.parapet_box, roughness: 0.7, metalness: 0.04 }),
-      pillar_plinth: new THREE.MeshStandardMaterial({ color: categoryColors.pillar_plinth, roughness: 0.65, metalness: 0.08 }),
-      int_living: new THREE.MeshStandardMaterial({ color: categoryColors.int_living, roughness: 0.85 }),
-      int_master: new THREE.MeshStandardMaterial({ color: categoryColors.int_master, roughness: 0.85 }),
-      int_bed23: new THREE.MeshStandardMaterial({ color: categoryColors.int_bed23, roughness: 0.85 }),
-      int_kitchen: new THREE.MeshStandardMaterial({ color: categoryColors.int_kitchen, roughness: 0.85 }),
-      slab_trim: new THREE.MeshStandardMaterial({ color: categoryColors.slab_trim, roughness: 0.7, metalness: 0.05 })
+      ext_main: new THREE.MeshStandardMaterial({ color: categoryColors.ext_main, roughness: 0.76, metalness: 0.03, map: wallPlasterNoise }),
+      box_grooves: new THREE.MeshStandardMaterial({ color: categoryColors.box_grooves, roughness: 0.72, metalness: 0.04, map: wallPlasterNoise }),
+      parapet_box: new THREE.MeshStandardMaterial({ color: categoryColors.parapet_box, roughness: 0.7, metalness: 0.04, map: wallPlasterNoise }),
+      pillar_plinth: new THREE.MeshStandardMaterial({ color: categoryColors.pillar_plinth, roughness: 0.65, metalness: 0.08, map: wallPlasterNoise }),
+      int_living: new THREE.MeshStandardMaterial({ color: categoryColors.int_living, roughness: 0.85, map: wallPlasterNoise }),
+      int_master: new THREE.MeshStandardMaterial({ color: categoryColors.int_master, roughness: 0.85, map: wallPlasterNoise }),
+      int_bed23: new THREE.MeshStandardMaterial({ color: categoryColors.int_bed23, roughness: 0.85, map: wallPlasterNoise }),
+      int_kitchen: new THREE.MeshStandardMaterial({ color: categoryColors.int_kitchen, roughness: 0.85, map: wallPlasterNoise }),
+      slab_trim: new THREE.MeshStandardMaterial({ color: categoryColors.slab_trim, roughness: 0.7, metalness: 0.05, map: wallPlasterNoise })
     };
     materialsRef.current = mats;
 
@@ -529,15 +539,34 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
 
     const mirrorMat = new THREE.MeshStandardMaterial({ color: 0xd8e8f8, roughness: 0.05, metalness: 0.9 });
     const grilleMat = new THREE.MeshStandardMaterial({ color: 0x1f2124, roughness: 0.45, metalness: 0.6 });
-    const teakDoorMat = new THREE.MeshStandardMaterial({ color: 0x5a3119, roughness: 0.52, metalness: 0.05 });
+    const teakDoorMat = new THREE.MeshStandardMaterial({ color: 0x5a3119, roughness: 0.52, metalness: 0.05, map: woodGrainMap });
+    const furnitureWoodMat = new THREE.MeshStandardMaterial({ color: 0x9a663c, roughness: 0.5, map: woodGrainMap });
+    const walnutMat = new THREE.MeshStandardMaterial({ color: 0x6b4a30, roughness: 0.45, map: woodGrainMap });
+    const fabricGreyMat = new THREE.MeshStandardMaterial({ color: 0x8f959c, roughness: 0.92, map: fabricWeaveMap });
+    const fabricBeigeMat = new THREE.MeshStandardMaterial({ color: 0xc4b9a6, roughness: 0.92, map: fabricWeaveMap });
+    const fabricAccentMat = new THREE.MeshStandardMaterial({ color: 0xb5623a, roughness: 0.9, map: fabricWeaveMap });
+    const mattressMat = new THREE.MeshStandardMaterial({ color: 0xe8e4da, roughness: 0.9, map: fabricWeaveMap });
+    const duvetMat = new THREE.MeshStandardMaterial({ color: 0xd7cfc2, roughness: 0.95, map: fabricWeaveMap });
+    const marbleMat = new THREE.MeshStandardMaterial({ color: 0xf2efe9, roughness: 0.18, metalness: 0.05 });
+    const terracottaMat = new THREE.MeshStandardMaterial({ color: 0xa5673f, roughness: 0.85 });
+    const plantSoilMat = new THREE.MeshStandardMaterial({ color: 0x3d2f24, roughness: 0.95 });
+    const leafMatA = new THREE.MeshStandardMaterial({ color: 0x3f7233, roughness: 0.8 });
+    const leafMatB = new THREE.MeshStandardMaterial({ color: 0x528a3f, roughness: 0.8 });
+    const leafMatC = new THREE.MeshStandardMaterial({ color: 0x2e5c28, roughness: 0.82 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x6d5136, roughness: 0.9 });
+    const showerGlassMat = new THREE.MeshPhysicalMaterial({ color: 0xcfe0e8, transparent: true, opacity: 0.28, roughness: 0.05, metalness: 0.05 });
+    const cabinetMat = new THREE.MeshStandardMaterial({ color: 0x8d9aa4, roughness: 0.4, metalness: 0.1 });
+    const hobBlackMat = new THREE.MeshStandardMaterial({ color: 0x14161a, roughness: 0.28, metalness: 0.3 });
     const popCeilingMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.88 });
     const popCoveGlowMat = new THREE.MeshBasicMaterial({ color: 0xffe4b5 });
+    const coveLightMat = new THREE.MeshStandardMaterial({ color: 0xfff2d8, emissive: 0xffdf9e, emissiveIntensity: 0.85, roughness: 0.4 });
     const chromeMat = new THREE.MeshStandardMaterial({ color: 0xdcdcdc, roughness: 0.18, metalness: 0.88 });
     const applianceSteelMat = new THREE.MeshStandardMaterial({ color: 0x767b82, roughness: 0.32, metalness: 0.65 });
     const applianceBlackMat = new THREE.MeshStandardMaterial({ color: 0x18191b, roughness: 0.22, metalness: 0.45 });
     const ceramicWhiteMat = new THREE.MeshStandardMaterial({ color: 0xfcfcfc, roughness: 0.18, metalness: 0.08 });
-    const sofaFabricMat = new THREE.MeshStandardMaterial({ color: 0x8a7f72, roughness: 0.85 });
-    const cushionMat = new THREE.MeshStandardMaterial({ color: 0xc89b61, roughness: 0.8 });
+    const tvMat = new THREE.MeshStandardMaterial({ color: 0x101216, roughness: 0.25, metalness: 0.4 });
+    const sofaFabricMat = new THREE.MeshStandardMaterial({ color: 0x8a7f72, roughness: 0.85, map: fabricWeaveMap });
+    const cushionMat = new THREE.MeshStandardMaterial({ color: 0xc89b61, roughness: 0.8, map: fabricWeaveMap });
     const foliageDarkMat = new THREE.MeshStandardMaterial({ color: 0x2a5624, roughness: 0.8 });
     const foliageLightMat = new THREE.MeshStandardMaterial({ color: 0x437739, roughness: 0.75 });
 
@@ -887,59 +916,334 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     ]);
     addBox(4.8, 18.0, Y_PLINTH, Y_PLINTH + 0.09, -24.6, -20.5, bathTileMat, houseGroup, false);
 
-    // 8. FURNISHINGS & APPLIANCES
-    // Living Room L-Sofa & Center Table
-    addBox(6.5, 16.5, Y_PLINTH, Y_PLINTH + 1.35, 7.5, 10.4, sofaFabricMat);
-    addBox(6.5, 16.5, Y_PLINTH + 1.35, Y_PLINTH + 2.7, 9.7, 10.5, sofaFabricMat);
-    addBox(14.0, 16.8, Y_PLINTH, Y_PLINTH + 1.35, 1.0, 7.5, sofaFabricMat);
-    addBox(16.0, 16.8, Y_PLINTH + 1.35, Y_PLINTH + 2.7, 1.0, 7.5, sofaFabricMat);
-    addBox(7.2, 8.8, Y_PLINTH + 1.4, Y_PLINTH + 2.3, 8.8, 9.6, cushionMat);
-    addBox(11.5, 13.1, Y_PLINTH + 1.4, Y_PLINTH + 2.3, 8.8, 9.6, cushionMat);
-    addBox(8.5, 12.8, Y_PLINTH, Y_PLINTH + 1.15, 3.2, 5.8, teakDoorMat);
-    addBox(8.7, 12.6, Y_PLINTH + 1.15, Y_PLINTH + 1.22, 3.4, 5.6, glassMat, houseGroup, false);
-    addBox(6.8, 15.5, Y_PLINTH, Y_PLINTH + 1.5, -3.7, -2.5, teakDoorMat);
-    addBox(8.2, 14.0, Y_PLINTH + 2.8, Y_PLINTH + 6.0, -3.7, -3.5, applianceBlackMat);
+    // Helper builders for interior elements
+    function makeProp(
+      x1: number,
+      x2: number,
+      y1: number,
+      y2: number,
+      z1: number,
+      z2: number,
+      matKeyOrMat: SurfaceCategory | THREE.Material,
+      parent: THREE.Group = houseGroup,
+      edges = false
+    ) {
+      return addBox(x1, x2, y1, y2, z1, z2, matKeyOrMat, parent, edges);
+    }
 
-    // Kitchen Appliances
-    addBox(-12.5, -9.5, Y_PLINTH + 2.8, Y_PLINTH + 2.92, 22.5, 23.8, applianceBlackMat);
-    addBox(-12.6, -9.4, Y_PLINTH + 5.6, Y_PLINTH + 6.2, 22.2, 24.2, applianceSteelMat);
-    addBox(-11.6, -10.4, Y_PLINTH + 6.2, Y_PLINTH + 10.2, 23.0, 24.2, applianceSteelMat);
-    addBox(-17.4, -15.8, Y_PLINTH + 2.72, Y_PLINTH + 2.84, 15.5, 18.2, chromeMat);
-    addBox(-17.6, -15.0, Y_PLINTH, Y_PLINTH + 6.0, 7.5, 10.1, applianceSteelMat);
-    addBox(-5.8, -3.2, Y_PLINTH, Y_PLINTH + 2.2, 23.0, 24.2, ceramicWhiteMat);
+    function makePottedPlant(x: number, y: number, z: number, potH = 1.4, plantH = 2.6) {
+      const g = new THREE.Group();
+      const pot = new THREE.Mesh(new THREE.CylinderGeometry(potH * 0.55, potH * 0.42, potH, 14), terracottaMat);
+      pot.position.y = potH / 2;
+      pot.castShadow = true;
+      g.add(pot);
 
-    // Sanitary Fixtures & Outside Washing Machine
-    addBox(2.8, 4.5, Y_PLINTH, Y_PLINTH + 1.45, -23.8, -22.2, ceramicWhiteMat);
-    addBox(3.9, 4.5, Y_PLINTH + 1.45, Y_PLINTH + 2.6, -23.8, -22.2, ceramicWhiteMat);
-    addBox(2.2, 4.5, Y_PLINTH, Y_PLINTH + 2.6, -20.8, -18.6, teakDoorMat);
-    addBox(2.5, 4.2, Y_PLINTH + 2.6, Y_PLINTH + 2.95, -20.4, -19.0, ceramicWhiteMat);
-    addBox(4.55, 4.65, Y_PLINTH + 3.4, Y_PLINTH + 6.6, -20.6, -18.8, mirrorMat, houseGroup, false);
-    addBox(2.0, 4.5, Y_PLINTH + 6.8, Y_PLINTH + 7.0, -15.5, -15.0, chromeMat);
+      const soil = new THREE.Mesh(new THREE.CylinderGeometry(potH * 0.52, potH * 0.52, 0.06, 14), plantSoilMat);
+      soil.position.y = potH;
+      g.add(soil);
 
-    // Washing Machine in Passage Niche
-    addBox(2.0, 4.4, Y_PLINTH, Y_PLINTH + 2.9, -13.9, -11.5, applianceSteelMat);
-    addBox(1.92, 2.0, Y_PLINTH + 0.6, Y_PLINTH + 2.2, -13.3, -12.1, applianceBlackMat);
+      for (let i = 0; i < 7; i++) {
+        const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.12, plantH * (0.5 + Math.random() * 0.5), 6), i % 2 === 0 ? leafMatB : leafMatA);
+        leaf.position.set((Math.random() - 0.5) * 0.5, potH + plantH * 0.45, (Math.random() - 0.5) * 0.5);
+        leaf.rotation.set((Math.random() - 0.5) * 0.7, Math.random() * Math.PI, (Math.random() - 0.5) * 0.7);
+        leaf.castShadow = true;
+        g.add(leaf);
+      }
+      g.position.set(x, y, z);
+      houseGroup.add(g);
+      return g;
+    }
 
-    // Master Bedroom
-    addBox(11.5, 17.6, Y_PLINTH, Y_PLINTH + 1.6, -15.2, -9.2, teakDoorMat);
-    addBox(11.7, 17.2, Y_PLINTH + 1.6, Y_PLINTH + 2.1, -15.0, -9.4, ceramicWhiteMat);
-    addBox(17.1, 17.6, Y_PLINTH + 1.6, Y_PLINTH + 3.8, -15.2, -9.2, cushionMat);
-    addBox(8.5, 16.5, Y_PLINTH, Y_PLINTH + 7.2, -5.5, -4.3, teakDoorMat);
-    addBox(15.5, 17.5, Y_PLINTH, Y_PLINTH + 1.5, -23.8, -22.2, ceramicWhiteMat);
-    addBox(9.5, 11.5, Y_PLINTH + 2.4, Y_PLINTH + 2.8, -24.3, -22.8, ceramicWhiteMat);
+    function makeWC(x: number, z: number, facing: 'x+' | 'x-' | 'z+' | 'z-', yF: number) {
+      const g = new THREE.Group();
+      const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.5, 1.05, 16), ceramicWhiteMat);
+      bowl.position.y = yF + 0.55;
+      bowl.castShadow = true;
+      g.add(bowl);
 
-    // Bedroom 2
-    addBox(-17.6, -11.8, Y_PLINTH, Y_PLINTH + 1.6, 1.2, 6.0, teakDoorMat);
-    addBox(-17.3, -12.0, Y_PLINTH + 1.6, Y_PLINTH + 2.1, 1.4, 5.8, ceramicWhiteMat);
-    addBox(-17.6, -17.1, Y_PLINTH + 1.6, Y_PLINTH + 3.6, 1.2, 6.0, cushionMat);
-    addBox(-17.6, -11.0, Y_PLINTH, Y_PLINTH + 7.2, -1.7, -0.4, teakDoorMat);
-    addBox(-17.6, -15.8, Y_PLINTH, Y_PLINTH + 1.5, -5.2, -3.6, ceramicWhiteMat);
-    addBox(-9.8, -8.0, Y_PLINTH + 2.4, Y_PLINTH + 2.8, -6.6, -5.2, ceramicWhiteMat);
+      const seat = new THREE.Mesh(new THREE.CylinderGeometry(0.66, 0.66, 0.14, 16), ceramicWhiteMat);
+      seat.position.y = yF + 1.12;
+      g.add(seat);
 
-    // Bedroom 3
-    addBox(-17.6, -11.8, Y_PLINTH, Y_PLINTH + 1.6, -21.5, -16.2, teakDoorMat);
-    addBox(-17.3, -12.0, Y_PLINTH + 1.6, Y_PLINTH + 2.1, -21.3, -16.4, ceramicWhiteMat);
-    addBox(-17.6, -10.0, Y_PLINTH, Y_PLINTH + 7.2, -14.8, -13.3, teakDoorMat);
+      const cistern = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.35, 0.55), ceramicWhiteMat);
+      cistern.position.y = yF + 1.75;
+      cistern.castShadow = true;
+      g.add(cistern);
+
+      if (facing === 'x+') g.rotation.y = Math.PI / 2;
+      if (facing === 'x-') g.rotation.y = -Math.PI / 2;
+      if (facing === 'z-') g.rotation.y = Math.PI;
+
+      g.position.set(x, 0, z);
+      houseGroup.add(g);
+      return g;
+    }
+
+    function makeBasin(x: number, z: number, w: number, d: number, yBase: number, mirrorWall: 'x+' | 'x-' | 'z+' | 'z-') {
+      makeProp(x - w / 2, x + w / 2, yBase, yBase + 2.4, z - d / 2, z + d / 2, walnutMat);
+      makeProp(x - w / 2 + 0.1, x + w / 2 - 0.1, yBase + 2.4, yBase + 2.52, z - d / 2 + 0.1, z + d / 2 - 0.1, marbleMat);
+
+      const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.5, 0.55, 16), ceramicWhiteMat);
+      bowl.position.set(x, yBase + 2.75, z);
+      bowl.castShadow = true;
+      houseGroup.add(bowl);
+
+      const faucet = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.0, 10), chromeMat);
+      faucet.position.set(x, yBase + 3.0, z);
+      houseGroup.add(faucet);
+
+      if (mirrorWall === 'x+') makeProp(x + w / 2 - 0.12, x + w / 2 - 0.02, yBase + 3.1, yBase + 5.6, z - d / 2 + 0.1, z + d / 2 - 0.1, mirrorMat);
+      if (mirrorWall === 'x-') makeProp(x - w / 2 + 0.02, x - w / 2 + 0.12, yBase + 3.1, yBase + 5.6, z - d / 2 + 0.1, z + d / 2 - 0.1, mirrorMat);
+      if (mirrorWall === 'z+') makeProp(x - w / 2 + 0.1, x + w / 2 - 0.1, yBase + 3.1, yBase + 5.6, z + d / 2 - 0.12, z + d / 2 - 0.02, mirrorMat);
+      if (mirrorWall === 'z-') makeProp(x - w / 2 + 0.1, x + w / 2 - 0.1, yBase + 3.1, yBase + 5.6, z - d / 2 + 0.02, z - d / 2 + 0.12, mirrorMat);
+    }
+
+    function makeShower(x: number, z: number, wallSide: 'x+' | 'x-' | 'z+' | 'z-', headY: number) {
+      const armLen = 0.85;
+      let ax = x, az = z;
+      if (wallSide === 'x+') ax = x - armLen / 2;
+      if (wallSide === 'x-') ax = x + armLen / 2;
+      if (wallSide === 'z+') az = z - armLen / 2;
+      if (wallSide === 'z-') az = z + armLen / 2;
+
+      const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, armLen, 8), chromeMat);
+      arm.rotation.z = Math.PI / 2;
+      if (wallSide === 'z+' || wallSide === 'z-') arm.rotation.y = Math.PI / 2;
+      arm.position.set(ax, headY, az);
+      houseGroup.add(arm);
+
+      const head = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.3, 0.18, 14), chromeMat);
+      head.position.set(
+        wallSide === 'x+' ? x - armLen : wallSide === 'x-' ? x + armLen : x,
+        headY - 0.15,
+        wallSide === 'z+' ? z - armLen : wallSide === 'z-' ? z + armLen : z
+      );
+      houseGroup.add(head);
+
+      const drain = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.05, 12), chromeMat);
+      drain.position.set(x, headY - 6.3, z);
+      houseGroup.add(drain);
+    }
+
+    function makeBed(x1: number, x2: number, zHead: number, zFoot: number, yF: number) {
+      const sgn = Math.sign(zFoot - zHead) || 1;
+      const zMin = Math.min(zHead, zFoot);
+      const zMax = Math.max(zHead, zFoot);
+
+      makeProp(x1, x2, yF + 0.15, yF + 1.15, zMin + 0.05, zMax - 0.05, furnitureWoodMat);
+      makeProp(x1 + 0.1, x2 - 0.1, yF + 1.15, yF + 1.9, zMin + 0.15, zMax - 0.15, mattressMat);
+
+      const dzA = zHead + (zFoot - zHead) * 0.38;
+      const dzB = zFoot - 0.12 * sgn;
+      makeProp(x1 + 0.06, x2 - 0.06, yF + 1.85, yF + 2.15, Math.min(dzA, dzB), Math.max(dzA, dzB), duvetMat);
+
+      makeProp(x1 - 0.12, x2 + 0.12, yF + 0.15, yF + 3.2, zHead - 0.15 * sgn, zHead + 0.18 * sgn, furnitureWoodMat);
+
+      const pzA = zHead + 0.22 * sgn;
+      const pzB = zHead + 1.05 * sgn;
+      makeProp(x1 + 0.1, x1 + (x2 - x1) * 0.46, yF + 1.9, yF + 2.45, Math.min(pzA, pzB), Math.max(pzA, pzB), mattressMat);
+      makeProp(x1 + (x2 - x1) * 0.54, x2 - 0.1, yF + 1.9, yF + 2.45, Math.min(pzA, pzB), Math.max(pzA, pzB), mattressMat);
+    }
+
+    function makeWardrobe(x1: number, x2: number, z1: number, z2: number, yF: number) {
+      makeProp(x1, x2, yF + 0.15, yF + 6.9, z1, z2, walnutMat);
+      const n = Math.max(2, Math.floor(Math.abs(x2 - x1) / 1.6));
+      for (let i = 1; i < n; i++) {
+        const lx = x1 + ((x2 - x1) * i) / n;
+        makeProp(lx - 0.03, lx + 0.03, yF + 0.35, yF + 6.7, z1 + (z2 - z1) * 0.06, z1 + (z2 - z1) * 0.94, furnitureWoodMat);
+      }
+      makeProp(x1 + 0.15, x2 - 0.15, yF + 6.9, yF + 7.05, z1 + 0.1, z2 - 0.1, furnitureWoodMat);
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. RICH INTERIOR STYLING & FURNISHING (DESIGN MATCH FROM Z AI MODEL)
+    // -------------------------------------------------------------------------
+    // 8A. LIVING ROOM (21'0" x 16'6")
+    // Seating Zone: Area rug with fabric weave
+    makeProp(6.2, 14.2, Y_PLINTH + 0.02, Y_PLINTH + 0.08, 2.2, 9.2, fabricAccentMat);
+
+    // 3-Seater Sofa with Individual Cushions and Arms
+    makeProp(7.4, 12.8, Y_PLINTH, Y_PLINTH + 1.0, 6.8, 9.2, fabricGreyMat);
+    makeProp(7.4, 12.8, Y_PLINTH + 1.0, Y_PLINTH + 2.3, 8.5, 9.2, fabricGreyMat);
+    makeProp(7.4, 7.9, Y_PLINTH + 1.0, Y_PLINTH + 1.85, 6.1, 9.2, fabricGreyMat);
+    makeProp(12.3, 12.8, Y_PLINTH + 1.0, Y_PLINTH + 1.85, 6.1, 9.2, fabricGreyMat);
+    for (let i = 0; i < 3; i++) {
+      makeProp(7.8 + i * 1.5, 9.1 + i * 1.5, Y_PLINTH + 1.0, Y_PLINTH + 1.15, 6.9, 8.45, fabricBeigeMat);
+    }
+
+    // 2 Lounge Armchairs
+    makeProp(5.4, 7.2, Y_PLINTH, Y_PLINTH + 1.0, 2.6, 4.9, fabricBeigeMat);
+    makeProp(5.4, 7.2, Y_PLINTH + 1.0, Y_PLINTH + 2.2, 2.6, 3.15, fabricBeigeMat);
+    makeProp(13.0, 14.8, Y_PLINTH, Y_PLINTH + 1.0, 2.6, 4.9, fabricBeigeMat);
+    makeProp(13.0, 14.8, Y_PLINTH + 1.0, Y_PLINTH + 2.2, 2.6, 3.15, fabricBeigeMat);
+
+    // Two-Tier Wooden Coffee Table
+    makeProp(8.5, 11.6, Y_PLINTH, Y_PLINTH + 1.35, 3.6, 5.5, furnitureWoodMat);
+    makeProp(8.8, 11.3, Y_PLINTH + 0.35, Y_PLINTH + 0.45, 3.85, 5.25, furnitureWoodMat);
+
+    // TV Console Unit & Wall-Mounted TV
+    makeProp(8.2, 13.8, Y_PLINTH, Y_PLINTH + 1.7, -3.9, -3.2, walnutMat);
+    makeProp(9.2, 12.8, Y_PLINTH + 3.2, Y_PLINTH + 5.9, -3.95, -3.85, tvMat);
+
+    // Dining Nook with 4 Chairs on Western Side of Living Hall
+    makeProp(-1.5, 3.2, Y_PLINTH, Y_PLINTH + 2.5, 4.2, 6.8, walnutMat);
+    makeProp(-1.65, 3.35, Y_PLINTH + 2.5, Y_PLINTH + 2.62, 4.05, 6.95, furnitureWoodMat);
+    for (let i = 0; i < 2; i++) {
+      makeProp(-1.1 + i * 3.4, -0.2 + i * 3.4, Y_PLINTH, Y_PLINTH + 1.45, 2.9, 3.95, furnitureWoodMat);
+      makeProp(-1.1 + i * 3.4, -0.2 + i * 3.4, Y_PLINTH + 1.45, Y_PLINTH + 2.55, 2.9, 3.2, furnitureWoodMat);
+      makeProp(-1.1 + i * 3.4, -0.2 + i * 3.4, Y_PLINTH, Y_PLINTH + 1.45, 7.05, 8.1, furnitureWoodMat);
+      makeProp(-1.1 + i * 3.4, -0.2 + i * 3.4, Y_PLINTH + 1.45, Y_PLINTH + 2.55, 7.8, 8.1, furnitureWoodMat);
+    }
+
+    // Dining Pendant Light Fixture
+    makeProp(0.7, 1.0, 9.4, 13.0, 5.35, 5.65, chromeMat);
+    const pendantShade = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.55, 1.1, 16), applianceBlackMat);
+    pendantShade.position.set(0.85, 8.9, 5.5);
+    pendantShade.castShadow = true;
+    houseGroup.add(pendantShade);
+    const pendantBulb = new THREE.Mesh(new THREE.SphereGeometry(0.28, 10, 8), coveLightMat);
+    pendantBulb.position.set(0.85, 8.45, 5.5);
+    houseGroup.add(pendantBulb);
+
+    // Living Room Wall Console & Warm Table Lamp
+    makeProp(16.8, 17.6, Y_PLINTH, Y_PLINTH + 2.5, 5.0, 9.5, walnutMat);
+    makeProp(17.1, 17.5, Y_PLINTH + 2.5, Y_PLINTH + 3.1, 6.4, 7.2, ceramicWhiteMat);
+    makeProp(17.15, 17.45, Y_PLINTH + 3.1, Y_PLINTH + 3.7, 6.5, 7.1, coveLightMat);
+
+    // Living Room Potted Plants in Corner
+    makePottedPlant(16.8, Y_PLINTH + 0.1, 10.9, 1.4, 2.6);
+
+    // 8B. MODULAR KITCHEN (18'0" x 12'0")
+    // Base Cabinet Units with Stainless Vertical Handle Profiles & Black Granite Countertop
+    makeProp(-17.8, -7.1, Y_PLINTH, Y_PLINTH + 2.65, 22.1, 24.25, cabinetMat);
+    makeProp(-17.8, -7.05, Y_PLINTH + 2.65, Y_PLINTH + 2.8, 22.0, 24.3, graniteMat);
+    makeProp(-17.8, -15.6, Y_PLINTH, Y_PLINTH + 2.65, 10.5, 22.1, cabinetMat);
+    makeProp(-17.8, -15.5, Y_PLINTH + 2.65, Y_PLINTH + 2.8, 10.4, 22.1, graniteMat);
+
+    // Cabinet Handle Grooves
+    for (let gx = -16.5; gx < -7.5; gx += 1.2) {
+      makeProp(gx, gx + 0.08, Y_PLINTH + 0.3, Y_PLINTH + 2.45, 22.05, 22.15, applianceSteelMat);
+    }
+    for (let gz = 11.5; gz < 21.5; gz += 1.2) {
+      makeProp(-15.55, -15.45, Y_PLINTH + 0.3, Y_PLINTH + 2.45, gz, gz + 0.08, applianceSteelMat);
+    }
+
+    // Stainless Steel Double-Bowl Sink with Swan-Neck Chrome Mixer Faucet
+    makeProp(-17.7, -15.8, Y_PLINTH + 2.7, Y_PLINTH + 2.78, 15.5, 18.2, applianceSteelMat);
+    makeProp(-17.65, -15.85, Y_PLINTH + 2.6, Y_PLINTH + 2.7, 15.6, 18.1, applianceSteelMat);
+    const sinkFaucet = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.1, 10), chromeMat);
+    sinkFaucet.position.set(-16.7, Y_PLINTH + 3.4, 16.85);
+    houseGroup.add(sinkFaucet);
+    const sinkSpout = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.55, 8), chromeMat);
+    sinkSpout.rotation.z = Math.PI / 2;
+    sinkSpout.position.set(-16.5, Y_PLINTH + 3.9, 16.85);
+    houseGroup.add(sinkSpout);
+
+    // 4-Burner Black Glass Gas Hob & Stainless Exhaust Chimney Hood
+    makeProp(-12.5, -9.5, Y_PLINTH + 2.8, Y_PLINTH + 2.92, 22.5, 23.8, hobBlackMat);
+    [[-12.0, 22.9], [-10.8, 22.9], [-12.0, 23.4], [-10.8, 23.4]].forEach(([bx, bz]) => {
+      const burner = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 0.09, 12), grilleMat);
+      burner.position.set(bx, Y_PLINTH + 2.98, bz);
+      houseGroup.add(burner);
+    });
+    makeProp(-12.8, -9.2, Y_PLINTH + 5.6, Y_PLINTH + 6.2, 22.3, 24.1, applianceSteelMat);
+    makeProp(-11.5, -10.5, Y_PLINTH + 6.2, Y_PLINTH + 10.4, 22.9, 23.9, applianceSteelMat);
+
+    // Upper Storage Cabinets
+    makeProp(-16.5, -7.5, Y_PLINTH + 5.5, Y_PLINTH + 7.5, 24.0, 24.28, cabinetMat);
+
+    // Double-Door Refrigerator
+    makeProp(-17.6, -14.8, Y_PLINTH, Y_PLINTH + 6.0, 7.5, 9.8, applianceSteelMat);
+    makeProp(-17.58, -14.82, Y_PLINTH + 3.8, Y_PLINTH + 6.0, 7.55, 9.75, applianceBlackMat);
+    makeProp(-14.75, -14.65, Y_PLINTH + 1.2, Y_PLINTH + 3.5, 7.8, 8.1, chromeMat);
+
+    // Breakfast Table & Wooden Stools in Kitchen
+    makeProp(-7.5, -4.8, Y_PLINTH, Y_PLINTH + 2.45, 12.0, 14.5, walnutMat);
+    makeProp(-7.65, -4.65, Y_PLINTH + 2.45, Y_PLINTH + 2.58, 11.85, 14.65, furnitureWoodMat);
+    [[-6.2, 11.2], [-6.2, 15.3]].forEach(([sx, sz]) => {
+      const stool = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.45, 1.6, 14), furnitureWoodMat);
+      stool.position.set(sx, Y_PLINTH + 0.8, sz);
+      stool.castShadow = true;
+      houseGroup.add(stool);
+    });
+
+    // 8C. PUJA SANCTUARY (5'0" x 3'0")
+    // White Marble Altar, Diya Lights & Traditional Jali Screen
+    makeProp(-6.6, -2.4, Y_PLINTH, Y_PLINTH + 1.5, 22.8, 24.2, marbleMat);
+    makeProp(-6.6, -2.45, Y_PLINTH + 1.5, Y_PLINTH + 5.5, 24.15, 24.28, walnutMat);
+    const deity1 = new THREE.Mesh(new THREE.SphereGeometry(0.42, 14, 12), marbleMat);
+    deity1.position.set(-5.2, Y_PLINTH + 2.1, 23.5);
+    deity1.castShadow = true;
+    houseGroup.add(deity1);
+    const deity2 = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.15, 10), marbleMat);
+    deity2.position.set(-3.8, Y_PLINTH + 2.25, 23.5);
+    deity2.castShadow = true;
+    houseGroup.add(deity2);
+    makeProp(-6.0, -5.7, Y_PLINTH + 1.5, Y_PLINTH + 1.7, 23.0, 23.3, coveLightMat);
+    makeProp(-3.3, -3.0, Y_PLINTH + 1.5, Y_PLINTH + 1.7, 23.0, 23.3, coveLightMat);
+    // Traditional wooden jali louvers across opening
+    for (let jy = Y_PLINTH + 0.3; jy < Y_PLINTH + 8.4; jy += 0.55) {
+      makeProp(-4.8, -4.75, jy, jy + 0.3, 21.6, 23.9, furnitureWoodMat, houseGroup, false);
+    }
+
+    // 8D. MASTER BEDROOM (12'0" x 14'6")
+    // King Platform Bed, Duvet, Plush Pillows & Bedside Tables
+    makeBed(10.5, 16.5, -19.8, -13.5, Y_PLINTH);
+    makeProp(9.2, 10.2, Y_PLINTH, Y_PLINTH + 1.9, -19.8, -18.8, walnutMat);
+    makeProp(16.8, 17.6, Y_PLINTH, Y_PLINTH + 1.9, -19.8, -18.8, walnutMat);
+    makeProp(9.45, 9.95, Y_PLINTH + 1.9, Y_PLINTH + 2.45, -19.5, -19.1, coveLightMat);
+    makeProp(17.05, 17.55, Y_PLINTH + 1.9, Y_PLINTH + 2.45, -19.5, -19.1, coveLightMat);
+    makeWardrobe(5.2, 6.2, -19.5, -11.5, Y_PLINTH);
+    makeProp(8.5, 12.5, Y_PLINTH, Y_PLINTH + 1.8, -5.0, -4.2, walnutMat);
+    makeProp(9.2, 11.5, Y_PLINTH + 2.8, Y_PLINTH + 5.2, -4.25, -4.15, tvMat);
+    makePottedPlant(16.8, Y_PLINTH + 0.1, -6.5, 1.3, 2.4);
+
+    // 8E. BEDROOM 2 (14'0" x 11'0")
+    // Queen Bed, Nightstands, Wardrobe & Study Desk
+    makeBed(-16.5, -11.0, 6.4, 0.8, Y_PLINTH);
+    makeProp(-17.5, -16.7, Y_PLINTH, Y_PLINTH + 1.9, 5.5, 6.4, walnutMat);
+    makeProp(-10.8, -10.0, Y_PLINTH, Y_PLINTH + 1.9, 5.5, 6.4, walnutMat);
+    makeProp(-17.3, -16.9, Y_PLINTH + 1.9, Y_PLINTH + 2.45, 5.7, 6.2, coveLightMat);
+    makeProp(-10.6, -10.2, Y_PLINTH + 1.9, Y_PLINTH + 2.45, 5.7, 6.2, coveLightMat);
+    makeWardrobe(-17.6, -12.0, -1.7, -0.6, Y_PLINTH);
+    makeProp(-7.5, -5.0, Y_PLINTH, Y_PLINTH + 2.2, 4.8, 6.2, furnitureWoodMat);
+
+    // 8F. BEDROOM 3 (14'0" x 12'0")
+    // Queen Bed against Rear Wall, Nightstands, Wardrobe & Potted Plant
+    makeBed(-16.5, -11.0, -24.0, -18.2, Y_PLINTH);
+    makeProp(-17.5, -16.7, Y_PLINTH, Y_PLINTH + 1.9, -24.0, -23.1, walnutMat);
+    makeProp(-10.8, -10.0, Y_PLINTH, Y_PLINTH + 1.9, -24.0, -23.1, walnutMat);
+    makeWardrobe(-17.6, -11.5, -14.6, -13.5, Y_PLINTH);
+    makePottedPlant(-4.2, Y_PLINTH + 0.1, -23.8, 1.3, 2.4);
+
+    // 8G. SANITARY WARE & BATHROOM FIXTURES
+    // Master Toilet
+    makeWC(16.5, -23.0, 'z-', Y_PLINTH);
+    makeBasin(11.0, -23.6, 3.4, 1.6, Y_PLINTH, 'z-');
+    makeShower(6.0, -22.5, 'x-', Y_PLINTH + 6.4);
+    makeProp(7.2, 7.35, Y_PLINTH, Y_PLINTH + 6.6, -24.3, -20.8, showerGlassMat);
+
+    // Bedroom 2 Attached Toilet
+    makeWC(-16.8, -4.8, 'x-', Y_PLINTH);
+    makeBasin(-13.5, -4.8, 3.2, 1.5, Y_PLINTH, 'z-');
+    makeShower(-8.8, -3.6, 'x+', Y_PLINTH + 6.4);
+    makeProp(-11.2, -11.05, Y_PLINTH, Y_PLINTH + 6.6, -5.5, -2.2, showerGlassMat);
+
+    // Common 3-Zone Sanitary Hub (Rear WC, Middle Basin, Front Shower)
+    makeWC(3.6, -23.2, 'z-', Y_PLINTH);
+    makeBasin(3.5, -19.5, 2.6, 1.5, Y_PLINTH, 'x+');
+    makeShower(2.8, -15.5, 'z+', Y_PLINTH + 6.2);
+    makeProp(1.8, 3.2, Y_PLINTH, Y_PLINTH + 6.4, -16.8, -16.65, showerGlassMat);
+
+    // Dedicated Washing Machine in Passage Utility Niche
+    makeProp(2.0, 4.4, Y_PLINTH, Y_PLINTH + 2.9, -13.9, -11.5, applianceSteelMat);
+    const wmDoor = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 0.1, 24), applianceBlackMat);
+    wmDoor.rotation.x = Math.PI / 2;
+    wmDoor.rotation.z = Math.PI / 2;
+    wmDoor.position.set(1.92, Y_PLINTH + 1.45, -12.7);
+    wmDoor.castShadow = true;
+    houseGroup.add(wmDoor);
+    makeProp(1.95, 4.4, Y_PLINTH + 2.7, Y_PLINTH + 2.9, -13.9, -11.5, applianceBlackMat);
 
     // 9. ROOF, PARAPETS, MUMTY TOWER & POP CEILINGS
     addBox(-18.9, -4.0, Y_CEIL, Y_SLAB, -25.4, -13.0, 'slab_trim', roofGroup);
@@ -1056,7 +1360,7 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     createCeilingFan(-10.5, Y_CEIL, -19.0); // Bedroom 3 Fan
 
     // 10. SURROUNDINGS: LAWN, PAVERS & TROPICAL SHRUBS
-    const lawnMat = new THREE.MeshStandardMaterial({ color: 0x385c2e, roughness: 0.95 });
+    const lawnMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, map: grassMap });
     const paverMat = new THREE.MeshStandardMaterial({ color: 0x5a5f64, roughness: 0.65 });
     const soilMat = new THREE.MeshStandardMaterial({ color: 0xded7cc, roughness: 0.9 });
 

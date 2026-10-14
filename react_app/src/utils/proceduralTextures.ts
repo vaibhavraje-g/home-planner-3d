@@ -272,3 +272,153 @@ export function createBlackGraniteTexture(anisotropy = 8): THREE.CanvasTexture {
   tex.needsUpdate = true;
   return tex;
 }
+
+/**
+ * Subtle neutral wood-grain overlay texture for furniture, cabinets, doors and frames.
+ */
+export function createWoodGrainTexture(anisotropy = 8): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return new THREE.CanvasTexture(canvas);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 512, 512);
+
+  for (let i = 0; i < 64; i++) {
+    const y0 = Math.random() * 512;
+    const dark = 0.06 + Math.random() * 0.12;
+    ctx.strokeStyle = `rgba(70, 40, 18, ${dark})`;
+    ctx.lineWidth = 0.8 + Math.random() * 1.8;
+    ctx.beginPath();
+    ctx.moveTo(0, y0);
+    for (let px = 0; px <= 512; px += 32) {
+      ctx.lineTo(px, y0 + Math.sin(px * 0.02 + i) * 2.8);
+    }
+    ctx.stroke();
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(2, 2);
+  tex.anisotropy = Math.min(anisotropy, 8);
+  tex.needsUpdate = true;
+  return tex;
+}
+
+/**
+ * Procedural fabric weave texture for sofas, armchairs, cushions, mattresses and duvets.
+ */
+export function createFabricTexture(anisotropy = 8): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return new THREE.CanvasTexture(canvas);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 256, 256);
+
+  // Micro thread specks
+  for (let i = 0; i < 1200; i++) {
+    const x = Math.random() * 256;
+    const y = Math.random() * 256;
+    const v = Math.random() > 0.5 ? 230 : 255;
+    ctx.fillStyle = `rgba(${v}, ${v}, ${v}, 0.35)`;
+    ctx.fillRect(x, y, 2, 1);
+  }
+
+  // Cross-weave thread grid
+  ctx.strokeStyle = 'rgba(170, 165, 158, 0.18)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 256; i += 6) {
+    ctx.beginPath();
+    ctx.moveTo(0, i);
+    ctx.lineTo(256, i);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(i, 0);
+    ctx.lineTo(i, 256);
+    ctx.stroke();
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(4, 4);
+  tex.anisotropy = Math.min(anisotropy, 8);
+  tex.needsUpdate = true;
+  return tex;
+}
+
+/**
+ * Micro plaster noise texture so painted walls look like real Asian Paints matte/silk emulsion.
+ */
+export function createPlasterTexture(anisotropy = 8): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return new THREE.CanvasTexture(canvas);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 256, 256);
+
+  for (let i = 0; i < 2200; i++) {
+    const x = Math.random() * 256;
+    const y = Math.random() * 256;
+    const v = Math.random() > 0.5 ? 255 : 185;
+    ctx.fillStyle = `rgba(${v}, ${v}, ${v}, 0.05)`;
+    ctx.fillRect(x, y, 1.8, 1.8);
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(6, 6);
+  tex.anisotropy = Math.min(anisotropy, 8);
+  tex.needsUpdate = true;
+  return tex;
+}
+
+/**
+ * Realistic blade-textured lawn grass.
+ */
+export function createGrassTexture(anisotropy = 8): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return new THREE.CanvasTexture(canvas);
+
+  ctx.fillStyle = '#3a542e';
+  ctx.fillRect(0, 0, 512, 512);
+
+  for (let i = 0; i < 5000; i++) {
+    const x = Math.random() * 512;
+    const y = Math.random() * 512;
+    const g = 75 + Math.random() * 75;
+    ctx.strokeStyle = `rgba(${g - 25}, ${g + 35}, ${g - 35}, 0.55)`;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + (Math.random() - 0.5) * 4, y - 3 - Math.random() * 4);
+    ctx.stroke();
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(24, 24);
+  tex.anisotropy = Math.min(anisotropy, 8);
+  tex.needsUpdate = true;
+  return tex;
+}
+
