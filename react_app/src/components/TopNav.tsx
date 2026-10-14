@@ -65,7 +65,7 @@ export const TopNav: React.FC<TopNavProps> = ({
   onCaptureSnapshot
 }) => {
   return (
-    <header className="absolute top-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2.5 p-2.5 sm:p-3 glass-panel rounded-2xl border border-white/10 shadow-2xl">
+    <header className="absolute top-2.5 left-2.5 right-2.5 z-20 flex items-center justify-between gap-2 px-3 py-2 glass-panel rounded-2xl border border-white/10 shadow-2xl overflow-x-auto no-scrollbar whitespace-nowrap">
       {/* Brand & Scale Badge */}
       <div className="flex items-center gap-2.5">
         <div className="flex flex-col">

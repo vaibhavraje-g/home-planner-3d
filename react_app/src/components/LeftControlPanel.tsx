@@ -59,10 +59,10 @@ export const LeftControlPanel: React.FC<LeftControlPanelProps> = ({
 
   return (
     <aside
-      className={`fixed top-20 left-3 z-30 transition-all duration-300 pointer-events-auto flex items-start ${
-        isOpen ? 'w-[330px] sm:w-[360px]' : 'w-auto'
+      className={`fixed top-[74px] left-2.5 z-30 transition-all duration-300 pointer-events-auto flex items-start ${
+        isOpen ? 'w-[320px] sm:w-[350px]' : 'w-auto'
       }`}
-      style={{ maxHeight: 'calc(100vh - 96px)' }}
+      style={{ maxHeight: 'calc(100vh - 86px)' }}
     >
       {/* Main Drawer Body (When Expanded) */}
       {isOpen && (

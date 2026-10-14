@@ -58,7 +58,7 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
   isFansActive,
   sunIntensity,
   interiorLightsActive,
-  isCinematicBloom = true,
+  isCinematicBloom = false,
   onSurfaceClick,
   onLabelPositionsUpdate,
   cameraTrigger,
@@ -127,16 +127,20 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
 
     mountRef.current.appendChild(renderer.domElement);
 
-    // Setup Cinematic Postprocessing Pipeline (Bloom, Tonemapping, Color Balance)
-    const composer = new EffectComposer(renderer);
+    // Setup Cinematic Postprocessing Pipeline with 4x MSAA
+    const renderTarget = new THREE.WebGLRenderTarget(width, height, {
+      type: THREE.HalfFloatType,
+      samples: 4
+    });
+    const composer = new EffectComposer(renderer, renderTarget);
     const renderPass = new RenderPass(scene, camera);
     composer.addPass(renderPass);
 
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(width, height),
-      0.28,  // bloom strength
-      0.35,  // bloom radius
-      0.82   // threshold - preserves clean white facades while blooming LEDs & sconces
+      0.15,  // subtle bloom strength
+      0.25,  // bloom radius
+      1.20   // threshold > 1.0 ensures white walls never bloom or wash out!
     );
     composer.addPass(bloomPass);
     bloomPassRef.current = bloomPass;
@@ -392,21 +396,21 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     };
   }, [isCinematicBloom]);
 
-  // Adjust Postprocessing Bloom dynamically with Time of Day
+  // Adjust Postprocessing Bloom dynamically with Time of Day (never blooming white walls)
   useEffect(() => {
     if (!bloomPassRef.current) return;
     if (timeOfDay === 'night') {
-      bloomPassRef.current.strength = 0.52;
-      bloomPassRef.current.threshold = 0.65;
-      bloomPassRef.current.radius = 0.48;
+      bloomPassRef.current.strength = 0.30;
+      bloomPassRef.current.threshold = 0.98;
+      bloomPassRef.current.radius = 0.35;
     } else if (timeOfDay === 'sunset') {
-      bloomPassRef.current.strength = 0.38;
-      bloomPassRef.current.threshold = 0.72;
-      bloomPassRef.current.radius = 0.42;
+      bloomPassRef.current.strength = 0.20;
+      bloomPassRef.current.threshold = 1.05;
+      bloomPassRef.current.radius = 0.28;
     } else {
-      bloomPassRef.current.strength = 0.24;
-      bloomPassRef.current.threshold = 0.82;
-      bloomPassRef.current.radius = 0.32;
+      bloomPassRef.current.strength = 0.12;
+      bloomPassRef.current.threshold = 1.25;
+      bloomPassRef.current.radius = 0.20;
     }
   }, [timeOfDay]);
 
@@ -427,12 +431,13 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     const sun = sunLightRef.current;
     const hemi = hemiLightRef.current;
 
+    // No atmospheric fog - guarantees 100% crisp, sharp, contrasty architectural rendering
+    sceneRef.current.fog = null;
+
     if (!isSkyActive) {
       sceneRef.current.background = new THREE.Color(0x111317);
-      sceneRef.current.fog = null;
     } else if (timeOfDay === 'morning') {
       sceneRef.current.background = new THREE.Color(0xc8ddfa);
-      sceneRef.current.fog = new THREE.FogExp2(0xc8ddfa, 0.0022);
       sun.color.setHex(0xfff5e4);
       sun.position.set(58, 68, 52);
       sun.intensity = sunIntensity;
@@ -441,7 +446,6 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       sconceLightsRef.current.forEach((l) => (l.intensity = 0.8));
     } else if (timeOfDay === 'noon') {
       sceneRef.current.background = new THREE.Color(0xd4e7fd);
-      sceneRef.current.fog = new THREE.FogExp2(0xd4e7fd, 0.0018);
       sun.color.setHex(0xffffff);
       sun.position.set(12, 85, 12);
       sun.intensity = sunIntensity * 1.15;
@@ -450,7 +454,6 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       sconceLightsRef.current.forEach((l) => (l.intensity = 0.4));
     } else if (timeOfDay === 'sunset') {
       sceneRef.current.background = new THREE.Color(0xe6ab7a);
-      sceneRef.current.fog = new THREE.FogExp2(0xe6ab7a, 0.0035);
       sun.color.setHex(0xff7722);
       sun.position.set(-60, 26, -20);
       sun.intensity = sunIntensity * 1.1;
@@ -459,7 +462,6 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       sconceLightsRef.current.forEach((l) => (l.intensity = 1.6));
     } else if (timeOfDay === 'night') {
       sceneRef.current.background = new THREE.Color(0x0a0c12);
-      sceneRef.current.fog = new THREE.FogExp2(0x0a0c12, 0.004);
       sun.color.setHex(0x334466);
       sun.position.set(-20, 50, -40);
       sun.intensity = 0.12;
