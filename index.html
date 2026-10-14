@@ -276,6 +276,42 @@
       height: 100%;
     }
 
+    .theme-desc {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      line-height: 1.25;
+    }
+
+    .swatch-filters {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-bottom: 7px;
+    }
+
+    .filter-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      padding: 3px 6px;
+      font-size: 9.5px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-pill:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+    }
+
+    .filter-pill.active {
+      background: var(--accent);
+      color: #111;
+      border-color: var(--accent);
+    }
+
     .swatch-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -548,58 +584,150 @@
   <div id="right-panel" class="glass-panel">
     <div class="panel-section">
       <div class="section-title">
-        <span>Architectural Color Themes</span>
+        <span>Architectural Color Themes (8 Combos)</span>
         <span style="font-size:10px; color:#cbd5e1; cursor:pointer; text-decoration:underline;" onclick="enableClayMode()">Clay Mode</span>
       </div>
 
+      <!-- Theme 1 -->
       <div class="theme-card active" id="theme-1" onclick="applyCuratedTheme(1)">
         <div class="theme-header">
-          <span>Theme 1: Realistic Site Render (Default)</span>
+          <span>1. Realistic Site Render (Default)</span>
         </div>
+        <div class="theme-desc">Innocent White L180 + Sand Drift 8461 + Camel Skin 8515 + Thundercloud 8305</div>
         <div class="swatch-strip">
           <span style="background:#F3EFE6" title="Innocent White L180"></span>
           <span style="background:#C4B59D" title="Sand Drift 8461"></span>
           <span style="background:#C89B61" title="Camel Skin 8515"></span>
           <span style="background:#474B4E" title="Thundercloud 8305"></span>
+          <span style="background:#5E4632" title="Nut Brown-N 0419"></span>
           <span style="background:#6B3E23" title="Fixed Dark Wood Porch Tiles"></span>
         </div>
       </div>
 
+      <!-- Theme 2 -->
       <div class="theme-card" id="theme-2" onclick="applyCuratedTheme(2)">
         <div class="theme-header">
-          <span>Theme 2: Soft Subtle Pastels</span>
+          <span>2. Soft Subtle Pastels</span>
         </div>
+        <div class="theme-desc">Cream Pie L152 + Aqua Hint L114 + Lilac Breeze 7188 + Gem Stone 7172</div>
         <div class="swatch-strip">
-          <span style="background:#F6F3EC"></span>
-          <span style="background:#D8EAE6"></span>
-          <span style="background:#E5DDEB"></span>
-          <span style="background:#D9DFE3"></span>
-          <span style="background:#6B3E23"></span>
+          <span style="background:#F6F3EC" title="Cream Pie L152"></span>
+          <span style="background:#D8EAE6" title="Aqua Hint L114"></span>
+          <span style="background:#E5DDEB" title="Lilac Breeze 7188"></span>
+          <span style="background:#D9DFE3" title="Gem Stone 7172"></span>
+          <span style="background:#606466" title="Pewter 8298"></span>
+          <span style="background:#6B3E23" title="Fixed Dark Wood Porch Tiles"></span>
         </div>
       </div>
 
+      <!-- Theme 3 -->
       <div class="theme-card" id="theme-3" onclick="applyCuratedTheme(3)">
         <div class="theme-header">
-          <span>Theme 3: Modern Greige & Mocha Earth</span>
+          <span>3. Modern Greige & Mocha Earth</span>
         </div>
+        <div class="theme-desc">Morning Glory 0765 + Raw Jute 8513 + Nut Brown 0419 + Charcoal 8297</div>
         <div class="swatch-strip">
-          <span style="background:#FAF7EF"></span>
-          <span style="background:#AFA89B"></span>
-          <span style="background:#5E4632"></span>
-          <span style="background:#383A3C"></span>
-          <span style="background:#6B3E23"></span>
+          <span style="background:#FAF7EF" title="Morning Glory 0765"></span>
+          <span style="background:#AFA89B" title="Raw Jute 8513"></span>
+          <span style="background:#5E4632" title="Nut Brown-N 0419"></span>
+          <span style="background:#383A3C" title="Charcoal Grey 8297"></span>
+          <span style="background:#DFD5C6" title="Almond Frost 0957"></span>
+          <span style="background:#6B3E23" title="Fixed Dark Wood Porch Tiles"></span>
         </div>
       </div>
 
+      <!-- Theme 4 -->
+      <div class="theme-card" id="theme-4" onclick="applyCuratedTheme(4)">
+        <div class="theme-header">
+          <span>4. Tuscan Terracotta & Warm Ochre</span>
+        </div>
+        <div class="theme-desc">Silk Whispers L151 + Warm Ochre 0387 + Terracotta 0448 + Brule 0417</div>
+        <div class="swatch-strip">
+          <span style="background:#F5F0E6" title="Silk Whispers L151"></span>
+          <span style="background:#9D9484" title="Mushroom 8470"></span>
+          <span style="background:#B35437" title="Terracotta 0448"></span>
+          <span style="background:#8E6E53" title="Brule 0417"></span>
+          <span style="background:#A36B42" title="Rich Tan 8522"></span>
+          <span style="background:#6B3E23" title="Fixed Dark Wood Porch Tiles"></span>
+        </div>
+      </div>
+
+      <!-- Theme 5 -->
+      <div class="theme-card" id="theme-5" onclick="applyCuratedTheme(5)">
+        <div class="theme-header">
+          <span>5. Contemporary Concrete & Slate</span>
+        </div>
+        <div class="theme-desc">Ice Age 8295 + Grey Matter 8294 + Steel Grey 8300 + Jet Black 8513</div>
+        <div class="swatch-strip">
+          <span style="background:#D4D8DB" title="Ice Age 8295"></span>
+          <span style="background:#8E9296" title="Grey Matter 8294"></span>
+          <span style="background:#52575C" title="Steel Grey 8300"></span>
+          <span style="background:#1E2124" title="Jet Black 8513"></span>
+          <span style="background:#474B4E" title="Thundercloud 8305"></span>
+          <span style="background:#6B3E23" title="Fixed Dark Wood Porch Tiles"></span>
+        </div>
+      </div>
+
+      <!-- Theme 6 -->
+      <div class="theme-card" id="theme-6" onclick="applyCuratedTheme(6)">
+        <div class="theme-header">
+          <span>6. Coastal Marine & Ocean Teal</span>
+        </div>
+        <div class="theme-desc">White Butter L102 + Aqua Hint L114 + Ocean Spray 7472 + Teal Blast 7503</div>
+        <div class="swatch-strip">
+          <span style="background:#FAF6ED" title="White Butter L102"></span>
+          <span style="background:#D8EAE6" title="Aqua Hint L114"></span>
+          <span style="background:#A2D2DF" title="Ocean Spray 7472"></span>
+          <span style="background:#1F6E7A" title="Teal Blast 7503"></span>
+          <span style="background:#1D3557" title="Orient Blue 1247"></span>
+          <span style="background:#6B3E23" title="Fixed Dark Wood Porch Tiles"></span>
+        </div>
+      </div>
+
+      <!-- Theme 7 -->
+      <div class="theme-card" id="theme-7" onclick="applyCuratedTheme(7)">
+        <div class="theme-header">
+          <span>7. Vastu Sun & Soft Sage</span>
+        </div>
+        <div class="theme-desc">Canvas Cream 0313 + Soft Sage 7730 + Olive Path 7748 + Conifer 7688</div>
+        <div class="swatch-strip">
+          <span style="background:#EAE6DD" title="Canvas Cream 0313"></span>
+          <span style="background:#BAC8B8" title="Soft Sage 7730"></span>
+          <span style="background:#848B69" title="Olive Path 7748"></span>
+          <span style="background:#DFD5C6" title="Almond Frost 0957"></span>
+          <span style="background:#588157" title="Conifer 7688"></span>
+          <span style="background:#6B3E23" title="Fixed Dark Wood Porch Tiles"></span>
+        </div>
+      </div>
+
+      <!-- Theme 8 -->
+      <div class="theme-card" id="theme-8" onclick="applyCuratedTheme(8)">
+        <div class="theme-header">
+          <span>8. Royal Palace Ivory & Gold</span>
+        </div>
+        <div class="theme-desc">Pure Ivory 0311 + Sand Drift 8461 + Sunny Glow 0523 + Golden Brown 0408</div>
+        <div class="swatch-strip">
+          <span style="background:#F6EEDB" title="Pure Ivory 0311"></span>
+          <span style="background:#C4B59D" title="Sand Drift 8461"></span>
+          <span style="background:#F9C74F" title="Sunny Glow 0523"></span>
+          <span style="background:#784B29" title="Golden Brown 0408"></span>
+          <span style="background:#A36B42" title="Rich Tan 8522"></span>
+          <span style="background:#6B3E23" title="Fixed Dark Wood Porch Tiles"></span>
+        </div>
+      </div>
+
+      <!-- Clay Mode -->
       <div class="theme-card" id="theme-clay" onclick="enableClayMode()">
         <div class="theme-header">
           <span>Architectural Clay Mode (Porch Wood Preserved)</span>
         </div>
+        <div class="theme-desc">Uncolored matte clay surface for form & shadow study</div>
         <div class="swatch-strip">
           <span style="background:#EEEEEE"></span>
           <span style="background:#E0E0E0"></span>
+          <span style="background:#D6D6D6"></span>
           <span style="background:#CCCCCC"></span>
-          <span style="background:#6B3E23"></span>
+          <span style="background:#6B3E23" title="Fixed Dark Wood Porch Tiles"></span>
         </div>
       </div>
       <div class="lock-badge">🔒 Porch Dark Wood Tiles & Complementary Lighter Wood Ceiling are Fixed</div>
@@ -615,6 +743,7 @@
         <option value="box_grooves">Window Box Chajjas & Grooves (Sand Drift 8461)</option>
         <option value="parapet_box">Parapet Cutout Accent Frame (Camel Skin 8515)</option>
         <option value="pillar_plinth">Porch Circular Pillar & Plinth (Thundercloud 8305)</option>
+        <option value="slab_trim">Roof Slab Lintel & Parapet Coping (Nut Brown 0419)</option>
         <option value="int_living">Living Hall & Open Passage Walls</option>
         <option value="int_master">Master Bedroom Interior Walls</option>
         <option value="int_bed23">Bedrooms 2 & 3 Interior Walls</option>
@@ -625,6 +754,16 @@
     <div class="panel-section">
       <div class="section-title">
         <span>Official Asian Paints Swatches</span>
+        <small id="swatch-count-badge" style="color:var(--accent)">39 Shades</small>
+      </div>
+      <div class="swatch-filters">
+        <button class="filter-pill active" onclick="filterSwatches('all', this)">All</button>
+        <button class="filter-pill" onclick="filterSwatches('whites', this)">Whites</button>
+        <button class="filter-pill" onclick="filterSwatches('earth', this)">Earth</button>
+        <button class="filter-pill" onclick="filterSwatches('greys', this)">Greys</button>
+        <button class="filter-pill" onclick="filterSwatches('greens', this)">Greens</button>
+        <button class="filter-pill" onclick="filterSwatches('blues', this)">Blues</button>
+        <button class="filter-pill" onclick="filterSwatches('accents', this)">Accents</button>
       </div>
       <div class="swatch-grid" id="swatch-grid"></div>
     </div>
@@ -646,27 +785,59 @@
 
   <script>
     // ============================================================================
-    // 1. OFFICIAL ASIAN PAINTS SHADE DATABASE
+    // 1. OFFICIAL ASIAN PAINTS SHADE DATABASE (39 CURATED ARCHITECTURAL SHADES)
     // ============================================================================
     const ASIAN_PAINTS_SHADES = [
-      { name: "Innocent White", code: "L180", hex: "#F3EFE6" },
-      { name: "Morning Glory", code: "0765", hex: "#FAF7EF" },
-      { name: "Canvas Cream", code: "0313", hex: "#EAE6DD" },
-      { name: "Cream Pie", code: "L152", hex: "#F6F3EC" },
-      { name: "Absolute White", code: "L161", hex: "#FFFFFF" },
-      { name: "Sand Drift", code: "8461", hex: "#C4B59D" },
-      { name: "Camel Skin", code: "8515", hex: "#C89B61" },
-      { name: "Mushroom", code: "8470", hex: "#9D9484" },
-      { name: "Raw Jute", code: "8513", hex: "#AFA89B" },
-      { name: "Nut Brown-N", code: "0419", hex: "#5E4632" },
-      { name: "Almond Frost", code: "0957", hex: "#DFD5C6" },
-      { name: "Aqua Hint", code: "L114", hex: "#D8EAE6" },
-      { name: "Lilac Breeze", code: "7188", hex: "#E5DDEB" },
-      { name: "Lavender Lace", code: "7156", hex: "#E8E1E8" },
-      { name: "Gem Stone", code: "7172", hex: "#D9DFE3" },
-      { name: "Thundercloud", code: "8305", hex: "#474B4E" },
-      { name: "Charcoal Grey", code: "8297", hex: "#383A3C" },
-      { name: "Pewter", code: "8298", hex: "#606466" }
+      // Whites & Creams
+      { name: "Innocent White", code: "L180", hex: "#F3EFE6", group: "whites" },
+      { name: "Morning Glory", code: "0765", hex: "#FAF7EF", group: "whites" },
+      { name: "Canvas Cream", code: "0313", hex: "#EAE6DD", group: "whites" },
+      { name: "Cream Pie", code: "L152", hex: "#F6F3EC", group: "whites" },
+      { name: "Absolute White", code: "L161", hex: "#FFFFFF", group: "whites" },
+      { name: "Silk Whispers", code: "L151", hex: "#F5F0E6", group: "whites" },
+      { name: "White Butter", code: "L102", hex: "#FAF6ED", group: "whites" },
+      { name: "Pure Ivory", code: "0311", hex: "#F6EEDB", group: "whites" },
+
+      // Warm Earth, Teak & Sandstones
+      { name: "Sand Drift", code: "8461", hex: "#C4B59D", group: "earth" },
+      { name: "Camel Skin", code: "8515", hex: "#C89B61", group: "earth" },
+      { name: "Mushroom", code: "8470", hex: "#9D9484", group: "earth" },
+      { name: "Raw Jute", code: "8513", hex: "#AFA89B", group: "earth" },
+      { name: "Nut Brown-N", code: "0419", hex: "#5E4632", group: "earth" },
+      { name: "Almond Frost", code: "0957", hex: "#DFD5C6", group: "earth" },
+      { name: "Rich Tan", code: "8522", hex: "#A36B42", group: "earth" },
+      { name: "Brule", code: "0417", hex: "#8E6E53", group: "earth" },
+      { name: "Golden Brown", code: "0408", hex: "#784B29", group: "earth" },
+      { name: "Terracotta", code: "0448", hex: "#B35437", group: "earth" },
+      { name: "Warm Ochre", code: "0387", hex: "#D99F4E", group: "earth" },
+
+      // Greys, Slate & Charcoals
+      { name: "Thundercloud", code: "8305", hex: "#474B4E", group: "greys" },
+      { name: "Charcoal Grey", code: "8297", hex: "#383A3C", group: "greys" },
+      { name: "Pewter", code: "8298", hex: "#606466", group: "greys" },
+      { name: "Gem Stone", code: "7172", hex: "#D9DFE3", group: "greys" },
+      { name: "Grey Matter", code: "8294", hex: "#8E9296", group: "greys" },
+      { name: "Ice Age", code: "8295", hex: "#D4D8DB", group: "greys" },
+      { name: "Steel Grey", code: "8300", hex: "#52575C", group: "greys" },
+      { name: "Jet Black", code: "8513", hex: "#1E2124", group: "greys" },
+
+      // Sage & Greens
+      { name: "Soft Sage", code: "7730", hex: "#BAC8B8", group: "greens" },
+      { name: "Olive Path", code: "7748", hex: "#848B69", group: "greens" },
+      { name: "Meadow Grass", code: "7694", hex: "#A3B18A", group: "greens" },
+      { name: "Conifer", code: "7688", hex: "#588157", group: "greens" },
+
+      // Blues & Teals
+      { name: "Aqua Hint", code: "L114", hex: "#D8EAE6", group: "blues" },
+      { name: "Ocean Spray", code: "7472", hex: "#A2D2DF", group: "blues" },
+      { name: "Teal Blast", code: "7503", hex: "#1F6E7A", group: "blues" },
+      { name: "Orient Blue", code: "1247", hex: "#1D3557", group: "blues" },
+
+      // Accents & Pastels
+      { name: "Lilac Breeze", code: "7188", hex: "#E5DDEB", group: "accents" },
+      { name: "Lavender Lace", code: "7156", hex: "#E8E1E8", group: "accents" },
+      { name: "Sunny Glow", code: "0523", hex: "#F9C74F", group: "accents" },
+      { name: "Coral Beach", code: "0503", hex: "#E76F51", group: "accents" }
     ];
 
     const CATEGORY_LABELS = {
@@ -674,6 +845,7 @@
       box_grooves: "Window Box Chajjas & Grooves",
       parapet_box: "Parapet Cutout Accent Frame",
       pillar_plinth: "Porch Circular Pillar & Plinth",
+      slab_trim: "Roof Slab Lintel & Parapet Coping",
       int_living: "Living Hall & Open Passage Walls",
       int_master: "Master Bedroom Interior Walls",
       int_bed23: "Bedrooms 2 & 3 Interior Walls",
@@ -1607,14 +1779,27 @@
     // ============================================================================
     // 12. ASIAN PAINTS THEME CONTROLLER (PORCH WOOD ALWAYS FIXED)
     // ============================================================================
+    // ============================================================================
+    // 12. ASIAN PAINTS THEME CONTROLLER & FILTERABLE SHADE PALETTE
+    // ============================================================================
     let activeSurfaceCategory = 'ext_main';
+    let currentShadeFilter = 'all';
 
-    function renderSwatchGrid() {
+    function renderSwatchGrid(filterGroup = 'all') {
+      currentShadeFilter = filterGroup;
       const grid = document.getElementById('swatch-grid');
       grid.innerHTML = '';
-      ASIAN_PAINTS_SHADES.forEach(shade => {
+
+      const filtered = filterGroup === 'all' 
+        ? ASIAN_PAINTS_SHADES 
+        : ASIAN_PAINTS_SHADES.filter(s => s.group === filterGroup);
+
+      document.getElementById('swatch-count-badge').textContent = `${filtered.length} Shades`;
+
+      filtered.forEach(shade => {
         const div = document.createElement('div');
         div.className = 'color-swatch';
+        div.title = `${shade.name} (${shade.code}) - ${shade.hex}`;
         div.innerHTML = `
           <div class="swatch-circle" style="background:${shade.hex}"></div>
           <div class="swatch-name">${shade.name}</div>
@@ -1624,7 +1809,13 @@
         grid.appendChild(div);
       });
     }
-    renderSwatchGrid();
+    renderSwatchGrid('all');
+
+    function filterSwatches(group, btn) {
+      document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderSwatchGrid(group);
+    }
 
     function onSurfaceCategoryChange(cat) {
       activeSurfaceCategory = cat;
@@ -1640,6 +1831,121 @@
       document.getElementById('hud-selection-text').innerHTML =
         `<strong>Applied:</strong> <span style="color:var(--accent)">${shade.name} (${shade.code})</span> → ${CATEGORY_LABELS[category]}`;
     }
+
+    const CURATED_THEMES = {
+      1: {
+        name: "Theme 1: Realistic Site Render (Default)",
+        colors: {
+          ext_main: "#F3EFE6",
+          box_grooves: "#C4B59D",
+          parapet_box: "#C89B61",
+          pillar_plinth: "#474B4E",
+          slab_trim: "#5E4632",
+          int_living: "#EAE6DD",
+          int_master: "#DFD5C6",
+          int_bed23: "#F3EFE6",
+          int_kitchen: "#FAF7EF"
+        }
+      },
+      2: {
+        name: "Theme 2: Soft Subtle Pastels",
+        colors: {
+          ext_main: "#F6F3EC",
+          box_grooves: "#C4B59D",
+          parapet_box: "#D9DFE3",
+          pillar_plinth: "#606466",
+          slab_trim: "#606466",
+          int_living: "#D8EAE6",
+          int_master: "#E8E1E8",
+          int_bed23: "#E5DDEB",
+          int_kitchen: "#D8EAE6"
+        }
+      },
+      3: {
+        name: "Theme 3: Modern Greige & Mocha Earth",
+        colors: {
+          ext_main: "#FAF7EF",
+          box_grooves: "#AFA89B",
+          parapet_box: "#5E4632",
+          pillar_plinth: "#383A3C",
+          slab_trim: "#383A3C",
+          int_living: "#EAE6DD",
+          int_master: "#AFA89B",
+          int_bed23: "#DFD5C6",
+          int_kitchen: "#FAF7EF"
+        }
+      },
+      4: {
+        name: "Theme 4: Tuscan Terracotta & Warm Ochre",
+        colors: {
+          ext_main: "#F5F0E6",
+          box_grooves: "#9D9484",
+          parapet_box: "#B35437",
+          pillar_plinth: "#8E6E53",
+          slab_trim: "#A36B42",
+          int_living: "#D99F4E",
+          int_master: "#B35437",
+          int_bed23: "#EAE6DD",
+          int_kitchen: "#F5F0E6"
+        }
+      },
+      5: {
+        name: "Theme 5: Contemporary Concrete & Slate",
+        colors: {
+          ext_main: "#D4D8DB",
+          box_grooves: "#8E9296",
+          parapet_box: "#52575C",
+          pillar_plinth: "#1E2124",
+          slab_trim: "#474B4E",
+          int_living: "#D4D8DB",
+          int_master: "#8E9296",
+          int_bed23: "#FFFFFF",
+          int_kitchen: "#D4D8DB"
+        }
+      },
+      6: {
+        name: "Theme 6: Coastal Marine & Ocean Teal",
+        colors: {
+          ext_main: "#FAF6ED",
+          box_grooves: "#D8EAE6",
+          parapet_box: "#A2D2DF",
+          pillar_plinth: "#1F6E7A",
+          slab_trim: "#1D3557",
+          int_living: "#D8EAE6",
+          int_master: "#A2D2DF",
+          int_bed23: "#FAF6ED",
+          int_kitchen: "#D8EAE6"
+        }
+      },
+      7: {
+        name: "Theme 7: Vastu Sun & Soft Sage",
+        colors: {
+          ext_main: "#EAE6DD",
+          box_grooves: "#BAC8B8",
+          parapet_box: "#848B69",
+          pillar_plinth: "#DFD5C6",
+          slab_trim: "#588157",
+          int_living: "#EAE6DD",
+          int_master: "#BAC8B8",
+          int_bed23: "#A3B18A",
+          int_kitchen: "#EAE6DD"
+        }
+      },
+      8: {
+        name: "Theme 8: Royal Palace Ivory & Gold",
+        colors: {
+          ext_main: "#F6EEDB",
+          box_grooves: "#C4B59D",
+          parapet_box: "#F9C74F",
+          pillar_plinth: "#784B29",
+          slab_trim: "#A36B42",
+          int_living: "#F6EEDB",
+          int_master: "#F9C74F",
+          int_bed23: "#EAE6DD",
+          int_kitchen: "#F6EEDB"
+        }
+      }
+    };
 
     function enableClayMode() {
       document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
@@ -1657,51 +1963,32 @@
         slab_trim: "#DDDDDD"
       };
       Object.keys(clayColors).forEach(k => {
-        materials[k].color.set(clayColors[k]);
-        materials[k].needsUpdate = true;
+        if (materials[k]) {
+          materials[k].color.set(clayColors[k]);
+          materials[k].needsUpdate = true;
+        }
       });
+      document.getElementById('hud-selection-text').innerHTML =
+        `<strong>Theme:</strong> <span style="color:var(--accent)">Architectural Clay Mode (Porch Wood Preserved)</span>`;
     }
 
     function applyCuratedTheme(themeIndex) {
       document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
-      document.getElementById(`theme-${themeIndex}`).classList.add('active');
+      const card = document.getElementById(`theme-${themeIndex}`);
+      if (card) card.classList.add('active');
 
-      const setCol = (k, hex) => {
-        materials[k].color.set(hex);
-        materials[k].needsUpdate = true;
-      };
+      const theme = CURATED_THEMES[themeIndex];
+      if (!theme) return;
 
-      if (themeIndex === 1) {
-        setCol('ext_main', '#F3EFE6');
-        setCol('box_grooves', '#C4B59D');
-        setCol('parapet_box', '#C89B61');
-        setCol('pillar_plinth', '#474B4E');
-        setCol('int_living', '#EAE6DD');
-        setCol('int_master', '#DFD5C6');
-        setCol('int_bed23', '#F3EFE6');
-        setCol('int_kitchen', '#FAF7EF');
-        setCol('slab_trim', '#5E4632');
-      } else if (themeIndex === 2) {
-        setCol('ext_main', '#F6F3EC');
-        setCol('box_grooves', '#C4B59D');
-        setCol('parapet_box', '#D9DFE3');
-        setCol('pillar_plinth', '#606466');
-        setCol('int_living', '#D8EAE6');
-        setCol('int_master', '#E8E1E8');
-        setCol('int_bed23', '#E5DDEB');
-        setCol('int_kitchen', '#D8EAE6');
-        setCol('slab_trim', '#606466');
-      } else if (themeIndex === 3) {
-        setCol('ext_main', '#FAF7EF');
-        setCol('box_grooves', '#AFA89B');
-        setCol('parapet_box', '#5E4632');
-        setCol('pillar_plinth', '#383A3C');
-        setCol('int_living', '#EAE6DD');
-        setCol('int_master', '#AFA89B');
-        setCol('int_bed23', '#DFD5C6');
-        setCol('int_kitchen', '#FAF7EF');
-        setCol('slab_trim', '#383A3C');
-      }
+      Object.keys(theme.colors).forEach(cat => {
+        if (materials[cat]) {
+          materials[cat].color.set(theme.colors[cat]);
+          materials[cat].needsUpdate = true;
+        }
+      });
+
+      document.getElementById('hud-selection-text').innerHTML =
+        `<strong>Theme:</strong> <span style="color:var(--accent)">${theme.name}</span>`;
     }
 
     // Interactive Click-to-Select Paintable Surface
