@@ -135,7 +135,7 @@ export default function App() {
     }
   };
 
-  // Room teleport handler (5' 2" eye level = 7.67 ft in scene units)
+  // Room teleport handler (human eye level inside)
   const handleTeleportRoom = (roomId: string) => {
     const room = ROOM_DEFINITIONS.find((r) => r.id === roomId);
     if (!room) return;
@@ -144,20 +144,10 @@ export default function App() {
     setMode('walk');
     setIsRoofActive(true);
 
-    const eyeY = 7.67; // 2.5ft plinth + 5.17ft eye height
-    const posX = room.pos[0];
-    const posZ = room.pos[2];
-
-    const dx = room.look[0] - posX;
-    const dz = room.look[2] - posZ;
-    const len = Math.hypot(dx, dz) || 1;
-    const targetX = posX + (dx / len) * 2.8;
-    const targetZ = posZ + (dz / len) * 2.8;
-
     setCameraTrigger({
-      pos: [posX, eyeY, posZ],
-      look: [targetX, eyeY, targetZ],
-      duration: 800
+      pos: [room.pos[0], room.pos[1], room.pos[2]],
+      look: [room.look[0], room.look[1], room.look[2]],
+      duration: 850
     });
   };
 

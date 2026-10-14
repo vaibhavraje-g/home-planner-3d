@@ -98,9 +98,10 @@ export const CATEGORY_LABELS: Record<SurfaceCategory, { title: string; desc: str
 export const ASIAN_PAINTS_SHADES: AsianPaintShade[] = [
   // --- 1. WHITES & OFF-WHITES (HIGH LRV) ---
   { name: 'Innocent White', code: 'L180', hex: '#F3EFE6', group: 'whites', lrv: 86, series: 'Apex Ultima', description: 'Warm architectural white, Asian Paints all-time top exterior pick' },
+  { name: 'Morning Frost', code: '0765', hex: '#E5EAE3', group: 'whites', lrv: 85, series: 'Royale Luxury', description: 'Crisp morning frost off-white with delicate cool champagne clarity' },
   { name: 'Morning Glory', code: '0765', hex: '#FAF7EF', group: 'whites', lrv: 89, series: 'Royale Luxury', description: 'Crisp morning cream with soft champagne undertones' },
   { name: 'Canvas Cream', code: '0313', hex: '#EAE6DD', group: 'whites', lrv: 82, series: 'Royale Luxury', description: 'Subtle linen white, perfect for high-traffic living halls' },
-  { name: 'Cream Pie', code: 'L152', hex: '#F6F3EC', group: 'whites', lrv: 87, series: 'Apex Ultima', description: 'Silky off-white with delicate buttermilk warmth' },
+  { name: 'Cream Pie', code: 'L152', hex: '#EFE7D8', group: 'whites', lrv: 87, series: 'Apex Ultima', description: 'Silky off-white with delicate buttermilk warmth' },
   { name: 'Absolute White', code: 'L161', hex: '#FFFFFF', group: 'whites', lrv: 94, series: 'Apex Ultima', description: 'Pure architectural brilliant white for ceilings and fascia' },
   { name: 'White Silk', code: 'L171', hex: '#F1EFEA', group: 'whites', lrv: 85, series: 'Apex Ultima', description: 'Classic pearlescent off-white for luxury exterior facades' },
   { name: 'Pebble White', code: 'L136', hex: '#ECE8DF', group: 'whites', lrv: 81, series: 'Apex Ultima', description: 'Weathered stone off-white with balanced earthy warmth' },
@@ -112,20 +113,20 @@ export const ASIAN_PAINTS_SHADES: AsianPaintShade[] = [
   { name: 'Sand Drift', code: '8461', hex: '#C4B59D', group: 'earth', lrv: 51, series: 'Apex Ultima', description: 'Signature taupe-sand for projecting window box frames & grooves' },
   { name: 'Camel Skin', code: '8515', hex: '#C89B61', group: 'earth', lrv: 44, series: 'Apex Ultima', description: 'Rich desert camel, used on the main porch parapet feature frame' },
   { name: 'Mushroom', code: '8470', hex: '#9D9484', group: 'earth', lrv: 35, series: 'Apex Ultima', description: 'Sophisticated earthy greige-taupe for modern accents' },
-  { name: 'Raw Jute', code: '8513', hex: '#AFA89B', group: 'earth', lrv: 42, series: 'Royale Luxury', description: 'Organic natural fiber tone, warm and tactile' },
+  { name: 'Raw Jute', code: '8513', hex: '#A28D75', group: 'earth', lrv: 42, series: 'Royale Luxury', description: 'Organic natural fiber tone, warm and tactile' },
   { name: 'Nut Brown-N', code: '0419', hex: '#5E4632', group: 'earth', lrv: 18, series: 'Apex Ultima', description: 'Deep mocha roasted coffee tone for architectural grounding' },
   { name: 'Almond Frost', code: '0957', hex: '#DFD5C6', group: 'earth', lrv: 63, series: 'Royale Luxury', description: 'Gentle creamy almond, timeless interior living tone' },
   { name: 'Light Biscuit', code: '8514', hex: '#DACABC', group: 'earth', lrv: 58, series: 'Apex Ultima', description: 'Warm sand biscuit for understated exterior elegance' },
   { name: 'Desert Tan', code: '8521', hex: '#B89B7A', group: 'earth', lrv: 39, series: 'Apex Ultima', description: 'Sun-drenched architectural tan' },
-  { name: 'Rich Tan', code: '8522', hex: '#A88764', group: 'earth', lrv: 32, series: 'Apex Ultima', description: 'Warm amber tan with clay undertones' },
+  { name: 'Rich Tan', code: '8522', hex: '#8F6347', group: 'earth', lrv: 32, series: 'Apex Ultima', description: 'Warm amber tan with clay undertones for plinth and trim' },
   { name: 'Walnut Shell', code: '8632', hex: '#4A3B32', group: 'earth', lrv: 12, series: 'Woodtech', description: 'Dark walnut for external window trims and doors' },
   { name: 'Sand Dune', code: '8452', hex: '#D2C3B0', group: 'earth', lrv: 55, series: 'Apex Ultima', description: 'Fine golden sand tone with high curb appeal' },
   { name: 'Magnolia', code: '0387', hex: '#ECE2CE', group: 'earth', lrv: 74, series: 'Royale Luxury', description: 'Floral warm cream for serene master bedrooms' },
 
   // --- 3. MODERN URBAN GRAYS & CHARCOALS ---
   { name: 'Thundercloud', code: '8305', hex: '#474B4E', group: 'grays', lrv: 17, series: 'Apex Ultima', description: 'Deep architectural slate grey, perfect for porch pillar & plinth' },
-  { name: 'Charcoal Grey', code: '8297', hex: '#383A3C', group: 'grays', lrv: 12, series: 'Apex Ultima', description: 'Bold modern charcoal with graphite depth' },
-  { name: 'Pewter', code: '8298', hex: '#606466', group: 'grays', lrv: 26, series: 'Apex Ultima', description: 'Balanced medium industrial grey for pilasters and lintels' },
+  { name: 'Charcoal Grey', code: '8297', hex: '#3A3E45', group: 'grays', lrv: 12, series: 'Apex Ultima', description: 'Bold modern charcoal with graphite depth' },
+  { name: 'Pewter', code: '8298', hex: '#5B6168', group: 'grays', lrv: 26, series: 'Apex Ultima', description: 'Balanced medium industrial grey for pilasters and lintels' },
   { name: 'Whispering Smoke', code: '8308', hex: '#B0B7BC', group: 'grays', lrv: 48, series: 'Apex Ultima', description: 'Cool foggy silver-grey, top contemporary exterior shade' },
   { name: 'Smoke Grey', code: '8304', hex: '#7C8285', group: 'grays', lrv: 34, series: 'Apex Ultima', description: 'Neutral mid-tone grey with zero blue tint' },
   { name: 'Steel Gleam', code: '8286', hex: '#949B9E', group: 'grays', lrv: 41, series: 'Royale Luxury', description: 'Metallic sheen grey for modern architectural finishes' },
@@ -133,10 +134,11 @@ export const ASIAN_PAINTS_SHADES: AsianPaintShade[] = [
   { name: 'Slate Grey', code: '8292', hex: '#4F565C', group: 'grays', lrv: 20, series: 'Apex Ultima', description: 'Natural slate stone grey with subtle cool undertones' },
 
   // --- 4. VASTU EAST PASTELS & SERENE TONES ---
-  { name: 'Aqua Hint', code: 'L114', hex: '#D8EAE6', group: 'pastels', lrv: 78, series: 'Royale Luxury', description: 'Calming sea-mist pastel, Vastu recommended for East & Pooja' },
+  { name: 'Aqua Hint', code: 'L114', hex: '#DCE9E5', group: 'pastels', lrv: 78, series: 'Royale Luxury', description: 'Calming sea-mist pastel, Vastu recommended for East & Pooja' },
+  { name: 'Soft Dawn', code: '0935', hex: '#F2DDC6', group: 'pastels', lrv: 75, series: 'Royale Luxury', description: 'Gentle sunrise apricot pastel, brings warmth and vitality to living areas' },
   { name: 'Ocean Ridge', code: '7480', hex: '#87B5B5', group: 'pastels', lrv: 45, series: 'Royale Luxury', description: 'Coastal turquoise for accent walls and garden planter walls' },
   { name: 'Sky Mist', code: '7442', hex: '#C2D9E5', group: 'pastels', lrv: 68, series: 'Royale Luxury', description: 'Soft morning sky blue for tranquil guest bedrooms' },
-  { name: 'Lilac Breeze', code: '7188', hex: '#E5DDEB', group: 'pastels', lrv: 74, series: 'Royale Luxury', description: 'Subtle ethereal lilac for Bedroom 2 and reading corners' },
+  { name: 'Lilac Breeze', code: '7188', hex: '#DDD6E5', group: 'pastels', lrv: 74, series: 'Royale Luxury', description: 'Subtle ethereal lilac for Bedroom 2 and reading corners' },
   { name: 'Lavender Lace', code: '7156', hex: '#E8E1E8', group: 'pastels', lrv: 76, series: 'Royale Luxury', description: 'Delicate floral lavender with soothing evening resonance' },
   { name: 'Gem Stone', code: '7172', hex: '#D9DFE3', group: 'pastels', lrv: 72, series: 'Royale Luxury', description: 'Silvery blue-grey pastel for modern bedroom interiors' },
   { name: 'Pink Mist', code: '8092', hex: '#EEDBDD', group: 'pastels', lrv: 72, series: 'Royale Luxury', description: 'Warm romantic pastel for private suites' },
@@ -151,6 +153,7 @@ export const ASIAN_PAINTS_SHADES: AsianPaintShade[] = [
   { name: 'Soft Breeze', code: '8116', hex: '#E0E7DC', group: 'greens', lrv: 79, series: 'Royale Luxury', description: 'Airy pale green with serene natural presence' },
 
   // --- 6. VIBRANT HERITAGE & CONTEMPORARY ACCENTS ---
+  { name: 'Gold Mine', code: '7949', hex: '#E6B34A', group: 'vibrant', lrv: 55, series: 'Royale Luxury', description: 'Lustrous golden yellow for auspicious Pooja and parapet features' },
   { name: 'Terracotta', code: '0524', hex: '#B85D43', group: 'vibrant', lrv: 25, series: 'Apex Ultima', description: 'Authentic baked Indian clay terracotta for parapet & porch' },
   { name: 'Marigold', code: '7984', hex: '#E59B3C', group: 'vibrant', lrv: 46, series: 'Apex Ultima', description: 'Auspicious Indian festive golden-yellow accent' },
   { name: 'Saffron Spice', code: '7954', hex: '#D97724', group: 'vibrant', lrv: 34, series: 'Apex Ultima', description: 'Rich turmeric-saffron accent for Pooja and entrance niches' },
@@ -167,44 +170,63 @@ export const ASIAN_PAINTS_SHADES: AsianPaintShade[] = [
 export const CURATED_THEMES: CuratedTheme[] = [
   {
     id: 1,
-    name: 'Warm Sandstone & Teak',
-    subtitle: 'Blueprint & Construction Site Match (Default)',
+    name: 'Warm Heritage Sandstone & Teak',
+    subtitle: 'Site Blueprint Match • Innocent White & Camel Skin',
     category: 'Popular',
-    description: 'Matches the site photos and 3D architectural render: Innocent White main walls, Sand Drift box frames, Camel Skin parapet frame, and Thundercloud pillar & plinth.',
+    description: 'Matches the real site construction and 3D elevation render: Innocent White L180 body, Sand Drift 8461 box frames, Camel Skin 8515 parapet cutout, Teak wood porch wall, and Thundercloud 8305 plinth skirting. Interior features Canvas Cream 0313 living walls and Cream Pie L152 master suite.',
     colors: {
       ext_main: '#F3EFE6',      // Innocent White L180
       box_grooves: '#C4B59D',   // Sand Drift 8461
       parapet_box: '#C89B61',   // Camel Skin 8515
       pillar_plinth: '#474B4E', // Thundercloud 8305
       int_living: '#EAE6DD',    // Canvas Cream 0313
-      int_master: '#DFD5C6',    // Almond Frost 0957
+      int_master: '#EFE7D8',    // Cream Pie L152
       int_bed23: '#F3EFE6',     // Innocent White L180
-      int_kitchen: '#FAF7EF',   // Morning Glory 0765
+      int_kitchen: '#EAE6DD',   // Canvas Cream 0313
       slab_trim: '#5E4632'      // Nut Brown-N 0419
     },
-    swatchPreview: ['#F3EFE6', '#C4B59D', '#C89B61', '#474B4E', '#6B3E23']
+    swatchPreview: ['#F3EFE6', '#C4B59D', '#C89B61', '#474B4E', '#5E4632']
   },
   {
     id: 2,
-    name: 'Modern Greige & Mocha Earth',
-    subtitle: 'Raw Jute, Nut Brown & Charcoal',
+    name: 'Modern Minimalist Greige & Charcoal',
+    subtitle: 'Morning Frost, Raw Jute & Charcoal Grey',
     category: 'Modern',
-    description: 'Earthy, organic minimalist palette combining warm linen cream with tactile raw jute and deep coffee trims.',
+    description: 'Sophisticated architectural minimalism: Morning Frost 0765 exterior facade with Raw Jute 8513 box frames, grounded by bold Charcoal Grey 8297 plinth and parapet accents. Interiors flow into Whispering Smoke 8308 and Raw Jute with crisp Innocent White ceilings.',
     colors: {
-      ext_main: '#FAF7EF',      // Morning Glory 0765
-      box_grooves: '#AFA89B',   // Raw Jute 8513
-      parapet_box: '#5E4632',   // Nut Brown-N 0419
-      pillar_plinth: '#383A3C', // Charcoal Grey 8297
-      int_living: '#EAE6DD',    // Canvas Cream 0313
-      int_master: '#AFA89B',    // Raw Jute 8513
-      int_bed23: '#DFD5C6',     // Almond Frost 0957
-      int_kitchen: '#FAF7EF',   // Morning Glory 0765
-      slab_trim: '#383A3C'      // Charcoal Grey 8297
+      ext_main: '#E5EAE3',      // Morning Frost 0765
+      box_grooves: '#A28D75',   // Raw Jute 8513
+      parapet_box: '#3A3E45',   // Charcoal Grey 8297
+      pillar_plinth: '#3A3E45', // Charcoal Grey 8297
+      int_living: '#B0B7BC',    // Whispering Smoke 8308
+      int_master: '#A28D75',    // Raw Jute 8513
+      int_bed23: '#E5EAE3',     // Morning Frost 0765
+      int_kitchen: '#F3EFE6',   // Innocent White L180
+      slab_trim: '#3A3E45'      // Charcoal Grey 8297
     },
-    swatchPreview: ['#FAF7EF', '#AFA89B', '#5E4632', '#383A3C', '#6B3E23']
+    swatchPreview: ['#E5EAE3', '#A28D75', '#3A3E45', '#B0B7BC', '#F3EFE6']
   },
   {
     id: 3,
+    name: 'Vedic Vastu Harmonized (East Entrance)',
+    subtitle: 'Canvas Cream, Soft Dawn, Aqua Hint & Rich Tan',
+    category: 'Vastu',
+    description: 'Auspicious Vedic Vastu scheme for East-facing entrance: Sun-aligned Canvas Cream 0313 Indra facade, Gold Mine 7949 puja/parapet accents, and Rich Tan 8522 plinth grounding. Interiors feature Soft Dawn 0935 living hall and Aqua Hint L114 master bedroom serenity.',
+    colors: {
+      ext_main: '#EAE6DD',      // Canvas Cream 0313
+      box_grooves: '#C4B59D',   // Sand Drift 8461
+      parapet_box: '#E6B34A',   // Gold Mine 7949
+      pillar_plinth: '#8F6347', // Rich Tan 8522
+      int_living: '#F2DDC6',    // Soft Dawn 0935
+      int_master: '#DCE9E5',    // Aqua Hint L114
+      int_bed23: '#DDD6E5',     // Lilac Breeze 7188
+      int_kitchen: '#EAE6DD',   // Canvas Cream 0313
+      slab_trim: '#8F6347'      // Rich Tan 8522
+    },
+    swatchPreview: ['#EAE6DD', '#C4B59D', '#E6B34A', '#8F6347', '#DCE9E5']
+  },
+  {
+    id: 4,
     name: 'Whispering Smoke & White Silk',
     subtitle: 'Urban Monochromatic Elegance',
     category: 'Modern',
@@ -213,33 +235,14 @@ export const CURATED_THEMES: CuratedTheme[] = [
       ext_main: '#F1EFEA',      // White Silk L171
       box_grooves: '#B0B7BC',   // Whispering Smoke 8308
       parapet_box: '#7C8285',   // Smoke Grey 8304
-      pillar_plinth: '#383A3C', // Charcoal Grey 8297
+      pillar_plinth: '#3A3E45', // Charcoal Grey 8297
       int_living: '#F8F8F6',    // Swiss White L102
       int_master: '#B0B7BC',    // Whispering Smoke 8308
       int_bed23: '#D9DFE3',     // Gem Stone 7172
       int_kitchen: '#F1EFEA',   // White Silk L171
       slab_trim: '#4F565C'      // Slate Grey 8292
     },
-    swatchPreview: ['#F1EFEA', '#B0B7BC', '#7C8285', '#383A3C', '#6B3E23']
-  },
-  {
-    id: 4,
-    name: 'Vastu Harmonized (East Entrance)',
-    subtitle: 'Canvas Cream, Aqua Hint & Tan',
-    category: 'Vastu',
-    description: 'Vastu-aligned scheme: Sun-harmonized Canvas Cream for Indra/East facade, Aqua Hint for serenity, and Rich Tan for plinth grounding.',
-    colors: {
-      ext_main: '#EAE6DD',      // Canvas Cream 0313
-      box_grooves: '#C4B59D',   // Sand Drift 8461
-      parapet_box: '#A88764',   // Rich Tan 8522
-      pillar_plinth: '#606466', // Pewter 8298
-      int_living: '#EAE6DD',    // Canvas Cream 0313
-      int_master: '#DFD5C6',    // Almond Frost 0957
-      int_bed23: '#D8EAE6',     // Aqua Hint L114
-      int_kitchen: '#FAF5E8',   // White Butter L167
-      slab_trim: '#A88764'      // Rich Tan 8522
-    },
-    swatchPreview: ['#EAE6DD', '#C4B59D', '#A88764', '#D8EAE6', '#6B3E23']
+    swatchPreview: ['#F1EFEA', '#B0B7BC', '#7C8285', '#3A3E45', '#4F565C']
   },
   {
     id: 5,
@@ -248,17 +251,17 @@ export const CURATED_THEMES: CuratedTheme[] = [
     category: 'Popular',
     description: 'Gentle, light-filled pastel palette offering serene ambiance inside and playful, airy elevation accents.',
     colors: {
-      ext_main: '#F6F3EC',      // Cream Pie L152
+      ext_main: '#EFE7D8',      // Cream Pie L152
       box_grooves: '#C4B59D',   // Sand Drift 8461
       parapet_box: '#D9DFE3',   // Gem Stone 7172
-      pillar_plinth: '#606466', // Pewter 8298
-      int_living: '#D8EAE6',    // Aqua Hint L114
+      pillar_plinth: '#5B6168', // Pewter 8298
+      int_living: '#DCE9E5',    // Aqua Hint L114
       int_master: '#E8E1E8',    // Lavender Lace 7156
-      int_bed23: '#E5DDEB',     // Lilac Breeze 7188
-      int_kitchen: '#D8EAE6',   // Aqua Hint L114
-      slab_trim: '#606466'      // Pewter 8298
+      int_bed23: '#DDD6E5',     // Lilac Breeze 7188
+      int_kitchen: '#DCE9E5',   // Aqua Hint L114
+      slab_trim: '#5B6168'      // Pewter 8298
     },
-    swatchPreview: ['#F6F3EC', '#D8EAE6', '#E5DDEB', '#D9DFE3', '#6B3E23']
+    swatchPreview: ['#EFE7D8', '#DCE9E5', '#DDD6E5', '#D9DFE3', '#5B6168']
   },
   {
     id: 6,
@@ -277,7 +280,7 @@ export const CURATED_THEMES: CuratedTheme[] = [
       int_kitchen: '#FAF5E8',   // White Butter L167
       slab_trim: '#B85D43'      // Terracotta 0524
     },
-    swatchPreview: ['#F3EFE6', '#DFD5C6', '#B85D43', '#474B4E', '#6B3E23']
+    swatchPreview: ['#F3EFE6', '#DFD5C6', '#B85D43', '#474B4E', '#B85D43']
   },
   {
     id: 7,
@@ -296,7 +299,7 @@ export const CURATED_THEMES: CuratedTheme[] = [
       int_kitchen: '#F5EBD9',   // Pure Ivory 0315
       slab_trim: '#58634F'      // Deep Olive 7663
     },
-    swatchPreview: ['#F5EBD9', '#9CAE98', '#58634F', '#474B4E', '#6B3E23']
+    swatchPreview: ['#F5EBD9', '#9CAE98', '#58634F', '#474B4E', '#58634F']
   },
   {
     id: 'clay',
@@ -324,44 +327,44 @@ export const ROOM_DEFINITIONS: RoomDefinition[] = [
     id: 'porch',
     name: 'Front Porch / Verandah',
     dimensions: "20'6\" × 12'6\"",
-    tagline: 'Left Double Door • Fixed Teak Tiles • Sunken Lighter Wood Ceiling',
+    tagline: 'Left Double Door • Fixed Teak Tiles • Sunken Fluted Wood Ceiling',
     vastuZone: 'East (Indra / Surya)',
     vastuSignificance: 'Brings morning prana, vitality, and wealth into the household.',
-    pos: [6.0, 6.5, 18.5],
-    look: [-0.2, 6.5, 12.5],
+    pos: [6.0, 6.2, 23.5],
+    look: [6.0, 5.8, 12.5],
     planRect: { x: 55, y: 72, w: 42, h: 25 }
   },
   {
     id: 'living',
     name: 'Living Hall',
     dimensions: "21'0\" × 16'6\"",
-    tagline: 'Open to Kitchen & Central Passage • POP Tray Ceiling & Sconces',
+    tagline: 'L-Sectional Sofa • 65" TV Media Wall • POP False Ceiling & Coves',
     vastuZone: 'East / North-East',
     vastuSignificance: 'Spacious central living fosters family harmony and social growth.',
-    pos: [5.0, 6.5, 5.5],
-    look: [-3.5, 6.5, 7.0],
+    pos: [14.0, 6.2, 10.0],
+    look: [3.0, 5.2, 2.5],
     planRect: { x: 55, y: 44, w: 42, h: 26 }
   },
   {
     id: 'kitchen',
     name: 'Kitchen (Doorless Entry)',
     dimensions: "12'0\" × 18'0\"",
-    tagline: 'Open West Arch to Hall • 3 Windows • Granite L-Counter',
+    tagline: 'Granite L-Counter • Chimney & Hob • Double-Door Refrigerator',
     vastuZone: 'South-East (Agni Corner)',
     vastuSignificance: 'Ideal fire quadrant for food preparation, promoting health and prosperity.',
-    pos: [-10.0, 6.5, 14.0],
-    look: [-3.5, 6.5, 7.0],
+    pos: [-4.5, 6.2, 8.5],
+    look: [-12.5, 5.2, 16.5],
     planRect: { x: 3, y: 70, w: 49, h: 27 }
   },
   {
     id: 'puja',
     name: 'Pooja Ghar Sanctuary',
     dimensions: "5'0\" × 3'0\"",
-    tagline: 'East Corner of Kitchen • Carved Teak Jali Screen',
+    tagline: 'White Marble Mandir • Brass Diyas • Carved Teak Jali Screen',
     vastuZone: 'North-East (Ishan Corner)',
     vastuSignificance: 'Supreme spiritual quadrant for meditation, positive energy, and peace.',
-    pos: [-4.5, 6.5, 20.0],
-    look: [-4.5, 6.5, 24.2],
+    pos: [-5.2, 6.0, 16.8],
+    look: [-4.5, 5.2, 21.8],
     planRect: { x: 34, y: 88, w: 18, h: 9 }
   },
   {
@@ -371,8 +374,8 @@ export const ROOM_DEFINITIONS: RoomDefinition[] = [
     tagline: 'Direct Straight Axis from Front Entrance to Rear Exit Door',
     vastuZone: 'Brahmasthan / Central Axis',
     vastuSignificance: 'Unobstructed energy flow from front entrance straight to rear backyard.',
-    pos: [0.0, 6.5, -1.0],
-    look: [-0.2, 6.5, -24.0],
+    pos: [0.0, 6.2, 8.5],
+    look: [0.0, 6.0, -24.0],
     planRect: { x: 38, y: 38, w: 20, h: 30 }
   },
   {
@@ -388,35 +391,35 @@ export const ROOM_DEFINITIONS: RoomDefinition[] = [
   },
   {
     id: 'bed2',
-    name: 'Bedroom 2',
+    name: 'Bedroom 2 (Study Suite)',
     dimensions: "14'0\" × 11'0\"",
-    tagline: 'Middle Left • Single Entry Door • Attached Bath 5\'×10\'6"',
+    tagline: 'Dual-Monitor Workstation • Ergonomic Mesh Chair • Queen Bed',
     vastuZone: 'North-West / West',
     vastuSignificance: 'Ideal for children or guests; brings mental clarity and creative focus.',
-    pos: [-9.5, 6.5, 2.5],
-    look: [-17.5, 6.5, 2.5],
+    pos: [-14.0, 6.2, -1.0],
+    look: [-6.2, 5.0, 3.2],
     planRect: { x: 3, y: 52, w: 35, h: 18 }
   },
   {
     id: 'master',
     name: 'Master Bedroom',
     dimensions: "12'0\" × 14'6\"",
-    tagline: 'Rear Right • Private Attached Toilet 12\'×4\' • Box Window Ledge',
+    tagline: 'King Platform Bed • Headboard Lighting • Mirror Wardrobe',
     vastuZone: 'South-West (Nairutya Corner)',
     vastuSignificance: 'Master suite in Nairutya anchors authority, leadership, and emotional stability.',
-    pos: [10.5, 6.5, -12.0],
-    look: [17.0, 6.5, -12.0],
+    pos: [5.5, 6.2, -7.5],
+    look: [13.0, 5.2, -14.0],
     planRect: { x: 57, y: 15, w: 40, h: 27 }
   },
   {
     id: 'bed3',
-    name: 'Bedroom 3',
+    name: 'Bedroom 3 (Guest / Study)',
     dimensions: "14'0\" × 12'0\"",
-    tagline: 'Rear Left Corner • Direct Access to Common Sanitary Hub',
+    tagline: 'Queen Bed • Study Desk • Full Wardrobe • Cross Ventilation',
     vastuZone: 'North-West (Vayu Corner)',
     vastuSignificance: 'Peaceful guest / study room with cross-ventilation windows.',
-    pos: [-9.5, 6.5, -19.0],
-    look: [-17.5, 6.5, -19.0],
+    pos: [-13.5, 6.2, -15.0],
+    look: [-6.0, 5.2, -20.0],
     planRect: { x: 3, y: 3, w: 35, h: 25 }
   },
   {
@@ -426,9 +429,20 @@ export const ROOM_DEFINITIONS: RoomDefinition[] = [
     tagline: 'Independent WC • Washbasin • Shower & Dedicated Washing Machine Space',
     vastuZone: 'West Zone',
     vastuSignificance: 'Correct placement for waste drainage without impacting living zones.',
-    pos: [-0.5, 6.5, -17.5],
-    look: [4.0, 6.5, -18.5],
+    pos: [-0.5, 6.2, -17.5],
+    look: [4.0, 5.5, -18.5],
     planRect: { x: 40, y: 3, w: 15, h: 25 }
+  },
+  {
+    id: 'mumty',
+    name: 'Rooftop Staircase Mumty Tower',
+    dimensions: "11'0\" × 6'0\"",
+    tagline: 'Terrace Access Tower • Vertical Louver Ventilation • Overhanging Slab',
+    vastuZone: 'South-West / North-West (Elevated Heavy Mass)',
+    vastuSignificance: 'Height and massing on the Western/Southern quadrant provides Vastu stability.',
+    pos: [-12.0, 16.5, -9.5],
+    look: [-12.0, 16.5, 0.0],
+    planRect: { x: 3, y: 38, w: 25, h: 14 }
   }
 ];
 
