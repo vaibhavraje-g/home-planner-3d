@@ -13,28 +13,84 @@ export const AiRendersModal: React.FC<AiRendersModalProps> = ({ isOpen, onClose 
 
   const RENDERS = [
     {
-      id: 'exterior',
-      title: 'Villa Exterior Facade (3/4 Isometric)',
-      category: 'Frontier AI Architectural Visualizer',
-      specs: 'Innocent White L180 • Sand Drift 8461 • Camel Skin 8515 • Teak Tiles',
-      src: './renders/exterior_realistic_8k.jpg',
-      desc: 'Hyper-realistic 8K daylight architectural render matching the 37\' x 50\' blueprint and construction site photos. Showcases the 4 black granite steps, circular verandah pillar, horizontal teak plank wall, Camel Skin parapet frame, and side split-face stone cladding niche with warm 3000K sconce lighting.'
+      id: 'front_facade',
+      title: 'East Elevation (Front Facade & Sunken Porch)',
+      category: 'Exterior Facade',
+      specs: 'Innocent White L180 • Camel Skin 8515 • Teak Wood Tiles • Black Granite Steps',
+      src: './renders/front_facade_exact_8k.jpg',
+      desc: 'Exact front facade elevation matching the CAD blueprint and site photos. Features the +2\'6" raised plinth with 4 black granite steps and planter urns, sunken porch with circular RCC pillar, horizontal teak wood tile back wall, double-door entrance, Camel Skin (8515) parapet geometric frame, and rooftop mumty tower.'
     },
     {
-      id: 'living',
-      title: 'Living Hall & Dining Suite (21\' 0" × 16\' 6")',
-      category: 'Frontier AI Interior Visualizer',
-      specs: 'Canvas Cream 0313 • POP Cove LED 3000K • Vitrified Marble • Walnut Unit',
-      src: './renders/living_room_realistic_8k.jpg',
-      desc: 'Architectural Digest-grade interior visualizer render of the main living hall. Features linen-textured Canvas Cream walls, recessed POP false ceiling tray with warm LED cove glow, polished vitrified porcelain marble flooring, woven rug, modern sofa, and eastern dining nook with pendant fixture.'
+      id: 'south_elevation',
+      title: 'South Side Elevation (2 Box Windows & Stone Niche)',
+      category: 'Side Elevation',
+      specs: 'Innocent White L180 • Sand Drift 8461 • Natural Slate Stone • Up/Down Sconces',
+      src: './renders/south_elevation_exact_8k.jpg',
+      desc: 'Exact South elevation featuring 2 projecting concrete box windows with lower display ledges in Sand Drift (8461), 6 crisp horizontal plaster grooves on the corner pilaster, and the vertical split-face natural stone niche with dual up/down architectural beam sconces.'
     },
     {
-      id: 'master',
+      id: 'north_elevation',
+      title: 'North Side Elevation (5 Pilasters & Mumty)',
+      category: 'Side Elevation',
+      specs: 'Innocent White L180 • Sand Drift 8461 • Cantilevered Chajjas • Mumty Tower',
+      src: './renders/north_elevation_exact_8k.jpg',
+      desc: 'North facade showing the rhythmic sequence of 5 architectural pilasters, 4 windows with cantilevered concrete chajja sunshades, dark plinth skirting, and the elevated rooftop staircase mumty tower with vertical ventilation louvers.'
+    },
+    {
+      id: 'rear_elevation',
+      title: 'West Rear Elevation (Service Exit & Ventilators)',
+      category: 'Rear Elevation',
+      specs: 'Innocent White L180 • Sand Drift 8461 • Granite Steps • Frosted Louvers',
+      src: './renders/rear_elevation_exact_8k.jpg',
+      desc: 'Rear West elevation showing the central service exit door with black granite steps down to the backyard lawn, Bedroom 3 window, and high-level frosted louvered ventilators for the common bathroom, WC, and master ensuite.'
+    },
+    {
+      id: 'dollhouse_floorplan',
+      title: '3D Cutaway Dollhouse Architectural Overview',
+      category: 'Floorplan & Inner Walls',
+      specs: '37\' x 50\' Footprint • RCC Column Grid • 9"x12" Drop Beams • All 10 Rooms',
+      src: './renders/dollhouse_floorplan_exact_8k.jpg',
+      desc: 'Isometric cutaway perspective revealing the entire single-storey villa with roof removed. Displays all interior partition walls, structural RCC column grid, drop ceiling beams, central circulation spine, and full furnishing layout across all 10 rooms.'
+    },
+    {
+      id: 'living_hall',
+      title: 'Living Hall & Entertainment Suite (21\' 0" × 16\' 6")',
+      category: 'Interior Living Space',
+      specs: 'Canvas Cream 0313 • POP Cove LED 3000K • 65" 4K OLED • Fluted Wood Panel',
+      src: './renders/living_hall_exact_8k.jpg',
+      desc: 'Spacious living hall featuring multi-tiered POP false ceiling with warm 3000K LED cove light trough, modern black ceiling fan, L-shaped sectional sofa with throw pillows, 2-tier designer coffee table, and fluted wood media feature wall with 65" TV and bias backlighting.'
+    },
+    {
+      id: 'kitchen_modular',
+      title: 'Modular Kitchen & Breakfast Bar (12\' 0" × 18\' 0")',
+      category: 'Interior Modular Kitchen',
+      specs: 'Black Granite L-Counter • Stainless Chimney & Hob • Double-Door Refrigerator',
+      src: './renders/kitchen_modular_exact_8k.jpg',
+      desc: 'Modern kitchen layout featuring deep black polished granite L-counters with 4" splashback, undermount sink with gooseneck faucet under the window, 4-burner glass hob, overhead chimney hood, double-door refrigerator, and wooden breakfast counter.'
+    },
+    {
+      id: 'bedroom_study',
+      title: 'Bedroom 2 (Study Suite & Dual-Monitor Desk)',
+      category: 'Interior Study Bedroom',
+      specs: 'Dual 27" Monitors • Workstation PC • Ergonomic Mesh Chair • Queen Bed',
+      src: './renders/bedroom_study_workstation_exact_8k.jpg',
+      desc: 'Dedicated study bedroom featuring a walnut desk with dual 27" widescreen monitors (IDE + 3D blueprint) on an articulated arm, mid-tower PC with blue LED glow, mechanical keyboard, ergonomic mesh chair, queen platform bed, and Lilac Breeze accent wall.'
+    },
+    {
+      id: 'master_bedroom',
       title: 'Master Bedroom Suite (12\' 0" × 14\' 6")',
-      category: 'Frontier AI Interior Visualizer',
-      specs: 'Almond Frost 0957 • Desert Tan 8521 • Louver Wardrobe • Box Window',
-      src: './renders/master_bedroom_realistic_8k.jpg',
-      desc: 'Ultra-realistic visualization of the private master bedroom suite. Features soothing Almond Frost walls with a Desert Tan accent wall, king-size platform bed, bedside nightstands with warm reading lamps, floor-to-ceiling louvered wooden wardrobe, and corner window overlooking the lawn.'
+      category: 'Interior Master Suite',
+      specs: 'Aqua Hint L114 Accent • King Platform Bed • Mirror Wardrobe • Box Window',
+      src: './renders/master_bedroom_exact_8k.jpg',
+      desc: 'Serene master bedroom suite featuring a king platform bed with vertical channel headboard, serene Aqua Hint (L114) feature wall, floor-to-ceiling wardrobe with full-height mirror door, projecting box window with ledge seating, and ensuite door.'
+    },
+    {
+      id: 'pooja_sanctuary',
+      title: 'Pooja Ghar Sanctuary & Altar (5\' 0" × 3\' 0")',
+      category: 'Interior Sacred Sanctuary',
+      specs: 'White Makrana Marble Mandir • Brass Diyas • Carved Teak Jali Screen',
+      src: './renders/pooja_sanctuary_exact_8k.jpg',
+      desc: 'Traditional sacred sanctuary in the North-East corner featuring a handcrafted stepped white marble mandir with shikhara dome, sacred brass idols, glowing brass diya lamps, hanging bell, and intricate carved teak wood jali partition screen.'
     }
   ];
 
@@ -133,37 +189,42 @@ export const AiRendersModal: React.FC<AiRendersModalProps> = ({ isOpen, onClose 
           </div>
 
           {/* Thumbnail Selector Strip */}
-          <div className="grid grid-cols-3 gap-2.5">
-            {RENDERS.map((render, idx) => {
-              const isSelected = activeIndex === idx;
-              return (
-                <button
-                  key={render.id}
-                  onClick={() => setActiveIndex(idx)}
-                  className={`relative rounded-xl overflow-hidden border text-left transition-all flex flex-col group ${
-                    isSelected
-                      ? 'border-amber-400 ring-2 ring-amber-400/50 shadow-lg'
-                      : 'border-white/15 opacity-70 hover:opacity-100 hover:border-white/40'
-                  }`}
-                >
-                  <div className="w-full h-16 sm:h-20 bg-black/50 overflow-hidden">
-                    <img
-                      src={render.src}
-                      alt={render.title}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="p-1.5 sm:p-2 bg-slate-900/90 flex flex-col">
-                    <span className="text-[10px] sm:text-xs font-bold text-white line-clamp-1">
-                      {render.title}
-                    </span>
-                    <span className="text-[9px] text-amber-300 font-mono">
-                      {render.id.toUpperCase()} VIEW
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[11px] font-bold uppercase tracking-wide text-gray-400">
+              Select Architectural View to Inspect ({RENDERS.length}):
+            </span>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 max-h-44 overflow-y-auto pr-1">
+              {RENDERS.map((render, idx) => {
+                const isSelected = activeIndex === idx;
+                return (
+                  <button
+                    key={render.id}
+                    onClick={() => setActiveIndex(idx)}
+                    className={`relative rounded-xl overflow-hidden border text-left transition-all flex flex-col group ${
+                      isSelected
+                        ? 'border-amber-400 ring-2 ring-amber-400/50 shadow-lg'
+                        : 'border-white/15 opacity-70 hover:opacity-100 hover:border-white/40'
+                    }`}
+                  >
+                    <div className="w-full h-16 sm:h-20 bg-black/50 overflow-hidden">
+                      <img
+                        src={render.src}
+                        alt={render.title}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="p-1.5 bg-slate-900/90 flex flex-col">
+                      <span className="text-[10px] font-bold text-white line-clamp-1">
+                        {render.title}
+                      </span>
+                      <span className="text-[9px] text-amber-300 font-mono truncate">
+                        {render.category}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
