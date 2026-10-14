@@ -14,7 +14,8 @@ import {
   Camera,
   Info,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  Box
 } from 'lucide-react';
 import { TimeOfDay } from '../types/architectural';
 
@@ -37,6 +38,7 @@ interface TopNavProps {
   openSpecs: () => void;
   openVastu: () => void;
   openAiRenders: () => void;
+  openBlenderStudio: () => void;
   onCaptureSnapshot: () => void;
 }
 
@@ -59,6 +61,7 @@ export const TopNav: React.FC<TopNavProps> = ({
   openSpecs,
   openVastu,
   openAiRenders,
+  openBlenderStudio,
   onCaptureSnapshot
 }) => {
   return (
@@ -162,6 +165,15 @@ export const TopNav: React.FC<TopNavProps> = ({
         >
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
           <span>8K AI Renders</span>
+        </button>
+
+        <button
+          onClick={openBlenderStudio}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-orange-500/20 text-orange-300 border border-orange-500/40 hover:bg-orange-500/30 transition-all shadow-sm"
+          title="Blender & Professional 3D Visualization Pipeline (.GLB Export)"
+        >
+          <Box className="w-3.5 h-3.5 text-orange-400" />
+          <span>Blender 3D</span>
         </button>
 
         <button

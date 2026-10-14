@@ -2,6 +2,10 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import {
   SurfaceCategory,
   CuratedTheme,
@@ -34,11 +38,13 @@ interface ThreeCanvasProps {
   isFansActive: boolean;
   sunIntensity: number;
   interiorLightsActive: boolean;
+  isCinematicBloom?: boolean;
   onSurfaceClick: (category: SurfaceCategory) => void;
   onLabelPositionsUpdate?: (
     positions: { id: string; x: number; y: number; visible: boolean }[]
   ) => void;
   cameraTrigger?: { pos: [number, number, number]; look: [number, number, number]; duration?: number } | null;
+  onExportGLBReady?: (exporter: () => Promise<boolean>) => void;
 }
 
 export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
@@ -52,15 +58,19 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
   isFansActive,
   sunIntensity,
   interiorLightsActive,
+  isCinematicBloom = true,
   onSurfaceClick,
   onLabelPositionsUpdate,
-  cameraTrigger
+  cameraTrigger,
+  onExportGLBReady
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
+  const composerRef = useRef<EffectComposer | null>(null);
+  const bloomPassRef = useRef<UnrealBloomPass | null>(null);
 
   // Group references
   const houseGroupRef = useRef<THREE.Group>(new THREE.Group());
@@ -116,6 +126,24 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     rendererRef.current = renderer;
 
     mountRef.current.appendChild(renderer.domElement);
+
+    // Setup Cinematic Postprocessing Pipeline (Bloom, Tonemapping, Color Balance)
+    const composer = new EffectComposer(renderer);
+    const renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
+
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(width, height),
+      0.28,  // bloom strength
+      0.35,  // bloom radius
+      0.82   // threshold - preserves clean white facades while blooming LEDs & sconces
+    );
+    composer.addPass(bloomPass);
+    bloomPassRef.current = bloomPass;
+
+    const outputPass = new OutputPass();
+    composer.addPass(outputPass);
+    composerRef.current = composer;
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -208,6 +236,9 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       cameraRef.current.aspect = w / h;
       cameraRef.current.updateProjectionMatrix();
       rendererRef.current.setSize(w, h);
+      if (composerRef.current) {
+        composerRef.current.setSize(w, h);
+      }
     };
     window.addEventListener('resize', handleResize);
 
@@ -335,8 +366,12 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
         onLabelPositionsUpdate(positions);
       }
 
-      if (sceneRef.current && cameraRef.current && rendererRef.current) {
-        rendererRef.current.render(sceneRef.current, cameraRef.current);
+      if (sceneRef.current && cameraRef.current) {
+        if (isCinematicBloom && composerRef.current) {
+          composerRef.current.render();
+        } else if (rendererRef.current) {
+          rendererRef.current.render(sceneRef.current, cameraRef.current);
+        }
       }
     };
 
@@ -349,12 +384,41 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       window.removeEventListener('keyup', handleKeyUp);
       domEl.removeEventListener('pointerdown', handlePointerDown);
       domEl.removeEventListener('pointerup', handlePointerUp);
+      composer.dispose();
       renderer.dispose();
       if (mountRef.current && renderer.domElement) {
         mountRef.current.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [isCinematicBloom]);
+
+  // Adjust Postprocessing Bloom dynamically with Time of Day
+  useEffect(() => {
+    if (!bloomPassRef.current) return;
+    if (timeOfDay === 'night') {
+      bloomPassRef.current.strength = 0.52;
+      bloomPassRef.current.threshold = 0.65;
+      bloomPassRef.current.radius = 0.48;
+    } else if (timeOfDay === 'sunset') {
+      bloomPassRef.current.strength = 0.38;
+      bloomPassRef.current.threshold = 0.72;
+      bloomPassRef.current.radius = 0.42;
+    } else {
+      bloomPassRef.current.strength = 0.24;
+      bloomPassRef.current.threshold = 0.82;
+      bloomPassRef.current.radius = 0.32;
+    }
+  }, [timeOfDay]);
+
+  // Register glTF Exporter callback for Blender export
+  useEffect(() => {
+    if (onExportGLBReady) {
+      onExportGLBReady(async () => {
+        const { exportHouseToGLB } = await import('../utils/gltfExporterUtil');
+        return exportHouseToGLB(houseGroupRef.current, roofGroupRef.current, 'villa_37x50_asian_paints_model.glb');
+      });
+    }
+  }, [onExportGLBReady]);
 
   // Update Lighting for Time of Day & Intensity
   useEffect(() => {
@@ -505,36 +569,48 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       metalness: 0.05
     });
 
-    const graniteMat = new THREE.MeshStandardMaterial({
+    const graniteMat = new THREE.MeshPhysicalMaterial({
       map: createBlackGraniteTexture(),
-      roughness: 0.25,
-      metalness: 0.15
+      roughness: 0.18,
+      metalness: 0.15,
+      clearcoat: 0.85,
+      clearcoatRoughness: 0.08
     });
 
-    const interiorFloorMat = new THREE.MeshStandardMaterial({
+    const interiorFloorMat = new THREE.MeshPhysicalMaterial({
       map: createVitrifiedFloorTexture('#f3f0e8', 8),
-      roughness: 0.28,
-      metalness: 0.06
+      roughness: 0.16,
+      metalness: 0.04,
+      clearcoat: 0.88,
+      clearcoatRoughness: 0.08,
+      reflectivity: 0.85
     });
 
-    const porchFloorMat = new THREE.MeshStandardMaterial({
+    const porchFloorMat = new THREE.MeshPhysicalMaterial({
       map: createVitrifiedFloorTexture('#e0e4e8', 6),
-      roughness: 0.35,
-      metalness: 0.05
+      roughness: 0.28,
+      metalness: 0.04,
+      clearcoat: 0.55,
+      clearcoatRoughness: 0.12
     });
 
-    const bathTileMat = new THREE.MeshStandardMaterial({
+    const bathTileMat = new THREE.MeshPhysicalMaterial({
       map: createVitrifiedFloorTexture('#d5dee2', 10),
-      roughness: 0.42,
-      metalness: 0.05
+      roughness: 0.30,
+      metalness: 0.04,
+      clearcoat: 0.65,
+      clearcoatRoughness: 0.10
     });
 
     const glassMat = new THREE.MeshPhysicalMaterial({
-      color: 0x98c3e4,
+      color: 0xcee5f8,
       transparent: true,
-      opacity: 0.38,
-      roughness: 0.1,
-      metalness: 0.1
+      opacity: 0.42,
+      roughness: 0.05,
+      metalness: 0.08,
+      transmission: 0.65,
+      ior: 1.52,
+      thickness: 0.3
     });
 
     const mirrorMat = new THREE.MeshStandardMaterial({ color: 0xd8e8f8, roughness: 0.05, metalness: 0.9 });

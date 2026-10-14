@@ -7,6 +7,7 @@ import { BlueprintModal } from './components/BlueprintModal';
 import { SpecsModal } from './components/SpecsModal';
 import { VastuModal } from './components/VastuModal';
 import { AiRendersModal } from './components/AiRendersModal';
+import { BlenderStudioModal } from './components/BlenderStudioModal';
 import { FloatingLabelsOverlay } from './components/FloatingLabelsOverlay';
 import { WalkControlsOverlay } from './components/WalkControlsOverlay';
 import {
@@ -62,6 +63,24 @@ export default function App() {
   const [isSpecsOpen, setIsSpecsOpen] = useState<boolean>(false);
   const [isVastuOpen, setIsVastuOpen] = useState<boolean>(false);
   const [isAiRendersOpen, setIsAiRendersOpen] = useState<boolean>(false);
+  const [isBlenderOpen, setIsBlenderOpen] = useState<boolean>(false);
+
+  // Cinematic Postprocessing & glTF Export state
+  const [isCinematicBloom, setIsCinematicBloom] = useState<boolean>(true);
+  const [isExportingGLB, setIsExportingGLB] = useState<boolean>(false);
+  const exportGLBRef = React.useRef<(() => Promise<boolean>) | null>(null);
+
+  const handleExportGLB = async () => {
+    if (!exportGLBRef.current) return;
+    setIsExportingGLB(true);
+    try {
+      await exportGLBRef.current();
+    } catch (err) {
+      console.error('Export failed', err);
+    } finally {
+      setIsExportingGLB(false);
+    }
+  };
 
   // Mode change handler
   const handleSetMode = (newMode: 'orbit' | 'dollhouse' | 'walk') => {
@@ -168,9 +187,13 @@ export default function App() {
         isFansActive={isFansActive}
         sunIntensity={sunIntensity}
         interiorLightsActive={interiorLightsActive}
+        isCinematicBloom={isCinematicBloom}
         onSurfaceClick={(cat) => setActiveCategory(cat)}
         onLabelPositionsUpdate={setLabelPositions}
         cameraTrigger={cameraTrigger}
+        onExportGLBReady={(fn) => {
+          exportGLBRef.current = fn;
+        }}
       />
 
       {/* Floating 3D Room Badges (Only in Orbit / Dollhouse) */}
@@ -201,6 +224,7 @@ export default function App() {
         openSpecs={() => setIsSpecsOpen(true)}
         openVastu={() => setIsVastuOpen(true)}
         openAiRenders={() => setIsAiRendersOpen(true)}
+        openBlenderStudio={() => setIsBlenderOpen(true)}
         onCaptureSnapshot={handleCaptureSnapshot}
       />
 
@@ -223,6 +247,9 @@ export default function App() {
         setInteriorLightsActive={setInteriorLightsActive}
         isFansActive={isFansActive}
         setIsFansActive={setIsFansActive}
+        isCinematicBloom={isCinematicBloom}
+        setIsCinematicBloom={setIsCinematicBloom}
+        onOpenBlenderStudio={() => setIsBlenderOpen(true)}
         onOpenVastuModal={() => setIsVastuOpen(true)}
         activeRoomId={activeRoomId}
       />
@@ -262,6 +289,14 @@ export default function App() {
       <AiRendersModal
         isOpen={isAiRendersOpen}
         onClose={() => setIsAiRendersOpen(false)}
+      />
+
+      {/* Blender & Professional 3D Visualization Pipeline Modal */}
+      <BlenderStudioModal
+        isOpen={isBlenderOpen}
+        onClose={() => setIsBlenderOpen(false)}
+        onExportGLB={handleExportGLB}
+        isExporting={isExportingGLB}
       />
     </main>
   );

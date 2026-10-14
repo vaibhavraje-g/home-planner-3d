@@ -9,7 +9,9 @@ import {
   ArrowRight,
   Flame,
   ShieldCheck,
-  Footprints
+  Footprints,
+  Sparkles,
+  Box
 } from 'lucide-react';
 import {
   TimeOfDay,
@@ -28,6 +30,9 @@ interface LeftControlPanelProps {
   setInteriorLightsActive: (val: boolean) => void;
   isFansActive: boolean;
   setIsFansActive: (val: boolean) => void;
+  isCinematicBloom: boolean;
+  setIsCinematicBloom: (val: boolean) => void;
+  onOpenBlenderStudio: () => void;
   onOpenVastuModal: () => void;
   activeRoomId?: string;
 }
@@ -43,6 +48,9 @@ export const LeftControlPanel: React.FC<LeftControlPanelProps> = ({
   setInteriorLightsActive,
   isFansActive,
   setIsFansActive,
+  isCinematicBloom,
+  setIsCinematicBloom,
+  onOpenBlenderStudio,
   onOpenVastuModal,
   activeRoomId
 }) => {
@@ -251,6 +259,42 @@ export const LeftControlPanel: React.FC<LeftControlPanelProps> = ({
                   }`}
                 >
                   {isFansActive ? 'SPIN' : 'STOP'}
+                </button>
+              </div>
+
+              {/* Cinematic Post-Processing Bloom */}
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/10">
+                <div className="flex flex-col">
+                  <span className="font-semibold text-gray-200 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    Cinematic PBR Bloom
+                  </span>
+                  <span className="text-[10px] text-gray-400">Soft glow on LEDs, sconces & sunlight</span>
+                </div>
+                <button
+                  onClick={() => setIsCinematicBloom(!isCinematicBloom)}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    isCinematicBloom ? 'bg-amber-400 text-slate-950 shadow-sm' : 'bg-white/10 text-gray-400'
+                  }`}
+                >
+                  {isCinematicBloom ? 'ON' : 'OFF'}
+                </button>
+              </div>
+
+              {/* Blender 3D Export Quick Trigger */}
+              <div className="p-2.5 rounded-xl bg-orange-500/10 border border-orange-500/25 flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="font-bold text-orange-300 flex items-center gap-1.5 text-xs">
+                    <Box className="w-3.5 h-3.5 text-orange-400" />
+                    Blender & Cycles Studio
+                  </span>
+                  <span className="text-[10px] text-gray-400">Export .GLB or procedural Python</span>
+                </div>
+                <button
+                  onClick={onOpenBlenderStudio}
+                  className="px-2.5 py-1 rounded-lg text-xs font-bold bg-orange-500 text-slate-950 hover:bg-orange-400 transition-all shadow-sm"
+                >
+                  Open
                 </button>
               </div>
             </div>
