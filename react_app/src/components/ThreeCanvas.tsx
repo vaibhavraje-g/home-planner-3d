@@ -2,10 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { Sky } from 'three/examples/jsm/objects/Sky.js';
+
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
 import {
@@ -73,7 +72,6 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
   const composerRef = useRef<EffectComposer | null>(null);
-  const bloomPassRef = useRef<UnrealBloomPass | null>(null);
   const isCinematicBloomRef = useRef(isCinematicBloom);
   const isFansActiveRef = useRef(isFansActive);
   const lastLabelCameraRef = useRef<{ position: THREE.Vector3; quaternion: THREE.Quaternion } | null>(null);
@@ -85,7 +83,6 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
   const interiorLightsRef = useRef<THREE.Group>(new THREE.Group());
   const sunLightRef = useRef<THREE.DirectionalLight | null>(null);
   const hemiLightRef = useRef<THREE.HemisphereLight | null>(null);
-  const skyRef = useRef<Sky | null>(null);
   const sconceLightsRef = useRef<THREE.PointLight[]>([]);
   const porchLightsRef = useRef<THREE.PointLight[]>([]);
   const ceilingFansRef = useRef<THREE.Group[]>([]);
@@ -114,10 +111,7 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    const sky = new Sky();
-    sky.scale.setScalar(450);
-    scene.add(sky);
-    skyRef.current = sky;
+
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.3, 500);
     camera.position.set(52, 22, 58);
@@ -153,15 +147,6 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     ssaoPass.minDistance = 0.001;
     ssaoPass.maxDistance = 0.35;
     composer.addPass(ssaoPass);
-
-    const bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(width, height),
-      0.15,  // subtle bloom strength
-      0.25,  // bloom radius
-      1.20   // threshold > 1.0 ensures white walls never bloom or wash out!
-    );
-    composer.addPass(bloomPass);
-    bloomPassRef.current = bloomPass;
 
     const outputPass = new OutputPass();
     composer.addPass(outputPass);
@@ -419,7 +404,6 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       domEl.removeEventListener('pointerdown', handlePointerDown);
       domEl.removeEventListener('pointerup', handlePointerUp);
       ssaoPass.dispose();
-      bloomPass.dispose();
       composer.dispose();
       renderer.dispose();
       if (mountRef.current && renderer.domElement) {
@@ -436,23 +420,7 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     isFansActiveRef.current = isFansActive;
   }, [isFansActive]);
 
-  // Adjust Postprocessing Bloom dynamically with Time of Day (never blooming white walls)
-  useEffect(() => {
-    if (!bloomPassRef.current) return;
-    if (timeOfDay === 'night') {
-      bloomPassRef.current.strength = 0.30;
-      bloomPassRef.current.threshold = 0.98;
-      bloomPassRef.current.radius = 0.35;
-    } else if (timeOfDay === 'sunset') {
-      bloomPassRef.current.strength = 0.20;
-      bloomPassRef.current.threshold = 1.05;
-      bloomPassRef.current.radius = 0.28;
-    } else {
-      bloomPassRef.current.strength = 0.12;
-      bloomPassRef.current.threshold = 1.25;
-      bloomPassRef.current.radius = 0.20;
-    }
-  }, [timeOfDay]);
+
 
   // Register glTF Exporter callback for Blender export
   useEffect(() => {
@@ -475,25 +443,25 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     sceneRef.current.fog = null;
 
     if (!isSkyActive) {
-      sceneRef.current.background = new THREE.Color(0x111317);
+      sceneRef.current.background = new THREE.Color(0x141820);
     } else if (timeOfDay === 'morning') {
-      sceneRef.current.background = new THREE.Color(0xc8ddfa);
-      sun.color.setHex(0xfff5e4);
+      sceneRef.current.background = new THREE.Color(0xb2d2f7);
+      sun.color.setHex(0xfff6ea);
       sun.position.set(58, 68, 52);
       sun.intensity = sunIntensity;
       hemi.color.setHex(0xfffdf7);
-      hemi.groundColor.setHex(0x6a7b66);
+      hemi.groundColor.setHex(0x56674f);
       sconceLightsRef.current.forEach((l) => (l.intensity = 0.8));
     } else if (timeOfDay === 'noon') {
-      sceneRef.current.background = new THREE.Color(0xd4e7fd);
+      sceneRef.current.background = new THREE.Color(0xa7cff7);
       sun.color.setHex(0xffffff);
       sun.position.set(12, 85, 12);
       sun.intensity = sunIntensity * 1.15;
       hemi.color.setHex(0xffffff);
-      hemi.groundColor.setHex(0x758070);
+      hemi.groundColor.setHex(0x5e6e58);
       sconceLightsRef.current.forEach((l) => (l.intensity = 0.4));
     } else if (timeOfDay === 'sunset') {
-      sceneRef.current.background = new THREE.Color(0xe6ab7a);
+      sceneRef.current.background = new THREE.Color(0xd78d53);
       sun.color.setHex(0xff7722);
       sun.position.set(-60, 26, -20);
       sun.intensity = sunIntensity * 1.1;
@@ -501,23 +469,13 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       hemi.groundColor.setHex(0x42382c);
       sconceLightsRef.current.forEach((l) => (l.intensity = 1.6));
     } else if (timeOfDay === 'night') {
-      sceneRef.current.background = new THREE.Color(0x0a0c12);
+      sceneRef.current.background = new THREE.Color(0x0c0f16);
       sun.color.setHex(0x334466);
       sun.position.set(-20, 50, -40);
       sun.intensity = 0.12;
       hemi.color.setHex(0x222a38);
       hemi.groundColor.setHex(0x111318);
       sconceLightsRef.current.forEach((l) => (l.intensity = 2.4));
-    }
-
-    const sky = skyRef.current;
-    if (sky) {
-      sky.visible = isSkyActive && timeOfDay !== 'night';
-      sky.material.uniforms.sunPosition.value.copy(sun.position).normalize();
-      sky.material.uniforms.turbidity.value = timeOfDay === 'sunset' ? 9 : 3;
-      sky.material.uniforms.rayleigh.value = timeOfDay === 'sunset' ? 1.7 : 1.2;
-      sky.material.uniforms.mieCoefficient.value = timeOfDay === 'sunset' ? 0.008 : 0.002;
-      if (sky.visible) sceneRef.current.background = null;
     }
   }, [timeOfDay, isSkyActive, sunIntensity]);
 
@@ -1489,11 +1447,12 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     createCeilingFan(-10.5, Y_CEIL, -19.0); // Bedroom 3 Fan
 
     // 10. SURROUNDINGS: LAWN, PAVERS & TROPICAL SHRUBS
+    grassMap.repeat.set(80, 80);
     const lawnMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, map: grassMap });
     const paverMat = new THREE.MeshStandardMaterial({ color: 0x5a5f64, roughness: 0.65 });
     const soilMat = new THREE.MeshStandardMaterial({ color: 0xded7cc, roughness: 0.9 });
 
-    addBox(-65, 65, -0.4, 0, -65, 65, lawnMat, groundGroup, false);
+    addBox(-260, 260, -0.4, 0, -260, 260, lawnMat, groundGroup, false);
     addBox(-21, 24, -0.35, 0.03, -28, 36, paverMat, groundGroup, false);
     addBox(18.55, 20.4, 1.25, 1.38, -24.8, 12.3, soilMat, groundGroup, false);
     addBox(-18.3, -2.1, 1.25, 1.38, 25.05, 26.8, soilMat, groundGroup, false);

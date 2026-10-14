@@ -91,7 +91,7 @@ export default function App() {
   const [isBlenderOpen, setIsBlenderOpen] = useState<boolean>(false);
 
   // Cinematic Postprocessing & glTF Export state
-  const [isCinematicBloom, setIsCinematicBloom] = useState<boolean>(true);
+  const [isCinematicBloom, setIsCinematicBloom] = useState<boolean>(false);
   const [isExportingGLB, setIsExportingGLB] = useState<boolean>(false);
   const exportGLBRef = React.useRef<(() => Promise<boolean>) | null>(null);
 

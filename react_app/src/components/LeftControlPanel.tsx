@@ -262,14 +262,14 @@ export const LeftControlPanel: React.FC<LeftControlPanelProps> = ({
                 </button>
               </div>
 
-              {/* Cinematic Post-Processing Bloom */}
+              {/* Architectural Contact Shadows */}
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/10">
                 <div className="flex flex-col">
                   <span className="font-semibold text-gray-200 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                     Photo-Quality Shading
                   </span>
-                  <span className="text-[10px] text-gray-400">Contact shadows and soft light bloom</span>
+                  <span className="text-[10px] text-gray-400">Crisp architectural contact shadows</span>
                 </div>
                 <button
                   onClick={() => setIsCinematicBloom(!isCinematicBloom)}

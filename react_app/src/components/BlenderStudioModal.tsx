@@ -398,7 +398,7 @@ export const BlenderStudioModal: React.FC<BlenderStudioModalProps> = ({
                     <tr className="hover:bg-white/[0.02]">
                       <td className="p-3 font-bold text-blue-400">Three.js / React (Current)</td>
                       <td className="p-3">Interactive Web App</td>
-                      <td className="p-3">WebGL 2.0 PBR + UnrealBloomPass</td>
+                      <td className="p-3">WebGL 2.0 PBR Architectural Shading</td>
                       <td className="p-3 text-emerald-400 font-semibold">60 FPS (Zero Install)</td>
                       <td className="p-3">Live client customization, Asian Paints swatches, orbit & walk-through</td>
                     </tr>
