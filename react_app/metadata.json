@@ -1,0 +1,6 @@
+{
+  "name": "3D Villa Visualizer & Asian Paints Studio",
+  "description": "Interactive 3D architectural visualizer, walk-through simulator, cutaway dollhouse, and Asian Paints color decorator for the 37' × 50' contemporary Indian villa.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

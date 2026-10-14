@@ -1,0 +1,253 @@
+import React, { useState, useCallback } from 'react';
+import { ThreeCanvas } from './components/ThreeCanvas';
+import { TopNav } from './components/TopNav';
+import { SideControlPanel } from './components/SideControlPanel';
+import { BlueprintModal } from './components/BlueprintModal';
+import { SpecsModal } from './components/SpecsModal';
+import { VastuModal } from './components/VastuModal';
+import { FloatingLabelsOverlay } from './components/FloatingLabelsOverlay';
+import { WalkControlsOverlay } from './components/WalkControlsOverlay';
+import {
+  SurfaceCategory,
+  CuratedTheme,
+  TimeOfDay,
+  CURATED_THEMES,
+  CAMERA_PRESETS,
+  ROOM_DEFINITIONS
+} from './types/architectural';
+
+export default function App() {
+  // Exploration Mode: orbit | dollhouse | walk
+  const [mode, setMode] = useState<'orbit' | 'dollhouse' | 'walk'>('orbit');
+
+  // Paint & Theme state (Default: Theme 1 - Realistic Site Render)
+  const defaultTheme = CURATED_THEMES[0];
+  const [categoryColors, setCategoryColors] = useState<Record<SurfaceCategory, string>>(
+    defaultTheme.colors
+  );
+  const [activeThemeId, setActiveThemeId] = useState<number | 'clay'>(1);
+  const [activeCategory, setActiveCategory] = useState<SurfaceCategory>('ext_main');
+
+  // Time of Day & Lighting state
+  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>('morning');
+  const [sunIntensity, setSunIntensity] = useState<number>(1.25);
+  const [interiorLightsActive, setInteriorLightsActive] = useState<boolean>(true);
+
+  // Environment & Building visibility toggles
+  const [isSkyActive, setIsSkyActive] = useState<boolean>(true);
+  const [isGroundActive, setIsGroundActive] = useState<boolean>(true);
+  const [isRoofActive, setIsRoofActive] = useState<boolean>(true);
+  const [isFansActive, setIsFansActive] = useState<boolean>(true);
+  const [showLabels, setShowLabels] = useState<boolean>(true);
+
+  // Active room for Walk Inside mode
+  const [activeRoomId, setActiveRoomId] = useState<string>('living');
+
+  // Camera animations trigger
+  const [cameraTrigger, setCameraTrigger] = useState<{
+    pos: [number, number, number];
+    look: [number, number, number];
+    duration?: number;
+  } | null>(null);
+
+  // 3D projected label coordinates
+  const [labelPositions, setLabelPositions] = useState<
+    { id: string; x: number; y: number; visible: boolean }[]
+  >([]);
+
+  // Modals state
+  const [isBlueprintOpen, setIsBlueprintOpen] = useState<boolean>(false);
+  const [isSpecsOpen, setIsSpecsOpen] = useState<boolean>(false);
+  const [isVastuOpen, setIsVastuOpen] = useState<boolean>(false);
+
+  // Mode change handler
+  const handleSetMode = (newMode: 'orbit' | 'dollhouse' | 'walk') => {
+    setMode(newMode);
+    if (newMode === 'orbit') {
+      setIsRoofActive(true);
+      const iso = CAMERA_PRESETS.find((p) => p.id === 'iso') || CAMERA_PRESETS[0];
+      setCameraTrigger({ pos: iso.pos, look: iso.look, duration: 850 });
+    } else if (newMode === 'dollhouse') {
+      setIsRoofActive(false); // Detach roof in dollhouse view
+      setCameraTrigger({ pos: [34, 48, 36], look: [0, 4, -2], duration: 950 });
+    } else if (newMode === 'walk') {
+      setIsRoofActive(true);
+      handleTeleportRoom(activeRoomId || 'living');
+    }
+  };
+
+  // Camera preset handler
+  const handleSelectPreset = (presetId: string) => {
+    if (mode === 'walk') {
+      setMode('orbit');
+      setIsRoofActive(true);
+    }
+    const preset = CAMERA_PRESETS.find((p) => p.id === presetId);
+    if (preset) {
+      setCameraTrigger({ pos: preset.pos, look: preset.look, duration: 850 });
+    }
+  };
+
+  // Room teleport handler (5' 2" eye level = 7.67 ft in scene units)
+  const handleTeleportRoom = (roomId: string) => {
+    const room = ROOM_DEFINITIONS.find((r) => r.id === roomId);
+    if (!room) return;
+
+    setActiveRoomId(roomId);
+    setMode('walk');
+    setIsRoofActive(true);
+
+    const eyeY = 7.67; // 2.5ft plinth + 5.17ft eye height
+    const posX = room.pos[0];
+    const posZ = room.pos[2];
+
+    const dx = room.look[0] - posX;
+    const dz = room.look[2] - posZ;
+    const len = Math.hypot(dx, dz) || 1;
+    const targetX = posX + (dx / len) * 2.8;
+    const targetZ = posZ + (dz / len) * 2.8;
+
+    setCameraTrigger({
+      pos: [posX, eyeY, posZ],
+      look: [targetX, eyeY, targetZ],
+      duration: 800
+    });
+  };
+
+  // Paint color application handler
+  const handleApplyShade = (category: SurfaceCategory, hex: string) => {
+    setCategoryColors((prev) => ({
+      ...prev,
+      [category]: hex
+    }));
+    setActiveThemeId(-1); // Custom state
+  };
+
+  // Apply curated theme
+  const handleApplyTheme = (theme: CuratedTheme) => {
+    setCategoryColors(theme.colors);
+    setActiveThemeId(theme.id);
+  };
+
+  // Clay mode
+  const handleEnableClayMode = () => {
+    const clayTheme = CURATED_THEMES.find((t) => t.id === 'clay');
+    if (clayTheme) {
+      setCategoryColors(clayTheme.colors);
+      setActiveThemeId('clay');
+    }
+  };
+
+  // Capture HD Canvas Snapshot
+  const handleCaptureSnapshot = useCallback(() => {
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return;
+
+    const dataUrl = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.download = `37x50_villa_${mode}_${timeOfDay}_${new Date().toISOString().slice(0, 10)}.png`;
+    link.href = dataUrl;
+    link.click();
+  }, [mode, timeOfDay]);
+
+  return (
+    <main className="relative w-screen h-screen overflow-hidden bg-[#0d1017] text-white">
+      {/* 3D WebGL Canvas Layer (Full Unobstructed Viewport) */}
+      <ThreeCanvas
+        mode={mode}
+        activeCategory={activeCategory}
+        categoryColors={categoryColors}
+        isClayMode={activeThemeId === 'clay'}
+        timeOfDay={timeOfDay}
+        isSkyActive={isSkyActive}
+        isGroundActive={isGroundActive}
+        isRoofActive={isRoofActive}
+        isFansActive={isFansActive}
+        sunIntensity={sunIntensity}
+        interiorLightsActive={interiorLightsActive}
+        onSurfaceClick={(cat) => setActiveCategory(cat)}
+        onLabelPositionsUpdate={setLabelPositions}
+        cameraTrigger={cameraTrigger}
+      />
+
+      {/* Floating 3D Room Badges (Only in Orbit / Dollhouse) */}
+      <FloatingLabelsOverlay
+        labelPositions={labelPositions}
+        showLabels={showLabels}
+        mode={mode}
+        onTeleportRoom={handleTeleportRoom}
+      />
+
+      {/* Sleek Top Navigation Bar */}
+      <TopNav
+        mode={mode}
+        setMode={handleSetMode}
+        timeOfDay={timeOfDay}
+        setTimeOfDay={setTimeOfDay}
+        isSkyActive={isSkyActive}
+        toggleSky={() => setIsSkyActive(!isSkyActive)}
+        isGroundActive={isGroundActive}
+        toggleGround={() => setIsGroundActive(!isGroundActive)}
+        isRoofActive={isRoofActive}
+        toggleRoof={() => setIsRoofActive(!isRoofActive)}
+        isFansActive={isFansActive}
+        toggleFans={() => setIsFansActive(!isFansActive)}
+        showLabels={showLabels}
+        toggleLabels={() => setShowLabels(!showLabels)}
+        openBlueprint={() => setIsBlueprintOpen(true)}
+        openSpecs={() => setIsSpecsOpen(true)}
+        openVastu={() => setIsVastuOpen(true)}
+        onCaptureSnapshot={handleCaptureSnapshot}
+      />
+
+      {/* Walk Inside First-Person Movement HUD */}
+      <WalkControlsOverlay
+        mode={mode}
+        activeRoomId={activeRoomId}
+        onExitWalk={() => handleSetMode('orbit')}
+      />
+
+      {/* Sleek Floating Right-Side Control Panel (Zero Middle Occlusion) */}
+      <SideControlPanel
+        activeCategory={activeCategory}
+        setActiveCategory={setActiveCategory}
+        categoryColors={categoryColors}
+        onApplyShade={handleApplyShade}
+        onApplyTheme={handleApplyTheme}
+        onEnableClayMode={handleEnableClayMode}
+        activeThemeId={activeThemeId}
+        onSelectPreset={handleSelectPreset}
+        onTeleportRoom={handleTeleportRoom}
+        timeOfDay={timeOfDay}
+        setTimeOfDay={setTimeOfDay}
+        sunIntensity={sunIntensity}
+        setSunIntensity={setSunIntensity}
+        interiorLightsActive={interiorLightsActive}
+        setInteriorLightsActive={setInteriorLightsActive}
+        isFansActive={isFansActive}
+        setIsFansActive={setIsFansActive}
+        onOpenVastuModal={() => setIsVastuOpen(true)}
+      />
+
+      {/* Interactive 2D Blueprint Modal */}
+      <BlueprintModal
+        isOpen={isBlueprintOpen}
+        onClose={() => setIsBlueprintOpen(false)}
+        onSelectRoom={handleTeleportRoom}
+      />
+
+      {/* Architectural Specifications Modal */}
+      <SpecsModal
+        isOpen={isSpecsOpen}
+        onClose={() => setIsSpecsOpen(false)}
+      />
+
+      {/* Vastu Shastra Compliance Modal */}
+      <VastuModal
+        isOpen={isVastuOpen}
+        onClose={() => setIsVastuOpen(false)}
+        onSelectRoom={handleTeleportRoom}
+      />
+    </main>
+  );
+}
